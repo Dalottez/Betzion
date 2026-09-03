@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a3036"/>
+      <stop offset="100%" stop-color="#111417"/>
+    </radialGradient>
+    <linearGradient id="beak" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="feathers" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="60%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg)"/>
+  <!-- Neck and shoulders -->
+  <path d="M25,85 C28,65 38,55 45,50 C48,65 52,78 68,92 C50,96 35,92 25,85 Z" fill="#64748b"/>
+  <!-- Speckled pattern on neck -->
+  <circle cx="35" cy="70" r="2.5" fill="#f8fafc" opacity="0.8"/>
+  <circle cx="42" cy="65" r="2" fill="#f8fafc" opacity="0.8"/>
+  <circle cx="48" cy="72" r="3" fill="#f8fafc" opacity="0.8"/>
+  <circle cx="40" cy="78" r="2" fill="#f8fafc" opacity="0.8"/>
+  <circle cx="52" cy="80" r="2.5" fill="#f8fafc" opacity="0.8"/>
+  <circle cx="30" cy="76" r="1.5" fill="#cbd5e1" opacity="0.7"/>
+  <!-- Head -->
+  <path d="M42,52 C35,46 34,32 44,22 C55,12 72,16 78,30 C80,35 78,44 68,48 C58,52 48,55 42,52 Z" fill="url(#feathers)"/>
+  <!-- Crown / ruff feathers -->
+  <path d="M38,28 C34,26 30,30 32,34 C34,33 36,31 38,28 Z" fill="#cbd5e1"/>
+  <path d="M42,22 C38,18 32,20 35,26 C38,24 40,23 42,22 Z" fill="#cbd5e1"/>
+  <!-- Hooked Beak -->
+  <path d="M74,28 C82,29 92,34 94,42 C92,48 86,52 78,48 C76,42 74,35 74,28 Z" fill="url(#beak)"/>
+  <!-- Eye and fierce brow -->
+  <path d="M58,24 C64,24 70,27 68,30 C64,29 58,27 58,24 Z" fill="#1e293b"/>
+  <circle cx="63" cy="30" r="4.5" fill="#fbbf24"/>
+  <circle cx="64" cy="30" r="2.5" fill="#0f172a"/>
+  <circle cx="65" cy="29" r="1" fill="#ffffff"/>
+</svg>

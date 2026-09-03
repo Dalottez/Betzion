@@ -1,0 +1,547 @@
+<div class="dashboard-shell">
+  
+  <!-- ULTRA-SLEEK HEADER NAVBAR -->
+  <header class="dashboard-header">
+    <button
+      type="button"
+      class="mobile-menu-trigger phone-only"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-label="Open player menu"
+      (click)="toggleMobileMenu()"
+    >
+      <span class="hbar"></span>
+      <span class="hbar"></span>
+      <span class="hbar"></span>
+    </button>
+
+    <div class="header-brand-wrap" (click)="setNavTab('home')">
+      <img src="/assets/icons/betzion-app-icon.svg" class="brand-logo" alt="Betzion">
+      <span class="brand-name">VEX<span class="brand-accent">BET</span></span>
+    </div>
+
+    <!-- REFINED NAVIGATION TABS (LAPTOP VIEW) -->
+    <nav class="header-nav-tabs laptop-only">
+      <button class="nav-tab-item" [class.active]="activeNavTab() === 'home'" type="button" (click)="setNavTab('home')">
+        <span class="tab-label">Home</span>
+      </button>
+      
+      <button class="nav-tab-item" [class.active]="activeNavTab() === 'live'" type="button" (click)="setNavTab('live')">
+        <span class="tab-label">Live</span>
+        <span class="badge-count">179</span>
+      </button>
+
+      <!-- DOMINANT AVIATOR TAB -->
+      <span class="aviator-tab-dancer">
+        <button class="nav-tab-item nav-tab-aviator" [class.active]="activeNavTab() === 'aviator'" type="button" (click)="goToAviator()">
+          <span class="tab-label aviator-label">Aviator</span>
+          <span class="pulse-badge-hot">HOT</span>
+        </button>
+      </span>
+
+      <button class="nav-tab-item" type="button" (click)="openMyBetsModal()">
+        <span class="tab-label">My Bets</span>
+      </button>
+    </nav>
+
+    <!-- ACCOUNT CONTROLS (BALANCE & DEPOSIT PROMINENT ON BOTH MOBILE & LAPTOP) -->
+    <div class="header-account-cluster">
+      <div class="auth-btn-group" *ngIf="!isAuthenticated">
+        <button class="login-btn" type="button" (click)="goToLogin()">LOG IN</button>
+        <button class="register-btn" type="button" (click)="goToRegister()">SIGN UP</button>
+      </div>
+
+      <ng-container *ngIf="isAuthenticated">
+        <!-- REPOSITIONED BALANCE ON TOP FOR BOTH MOBILE & LAPTOP -->
+        <div class="neat-balance-pill" (click)="openAccountModal()" title="Account Balance">
+          <span class="bal-label">Balance</span>
+          <strong class="bal-val">KES {{ userBalance() | number:'1.2-2' }}</strong>
+        </div>
+
+        <button class="neat-deposit-btn" type="button" (click)="openDeposit()" title="Deposit via M-Pesa">
+          <span>Deposit</span>
+        </button>
+
+        <div class="profile-wrap laptop-only">
+          <button class="neat-profile-btn" type="button" (click)="toggleProfileMenu()" aria-label="User Profile">
+            <span class="profile-avatar">{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+            <span class="profile-username">{{ currentUser()?.username || 'Player' }}</span>
+            <span class="chevron">⌄</span>
+          </button>
+
+          <div class="profile-menu" *ngIf="showProfileMenu()">
+            <div class="profile-summary">
+              <span class="avatar-large">{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+              <div class="profile-summary-info">
+                <strong>{{ currentUser()?.username || 'Player' }}</strong>
+                <small class="balance-tag">KES {{ userBalance() | number:'1.2-2' }}</small>
+              </div>
+            </div>
+            <button type="button" (click)="openMyBetsModal()">My Bets & History</button>
+            <button type="button" (click)="openAccountModal()">Account Profile</button>
+            <button type="button" (click)="openDeposit()">Deposit Funds</button>
+            <button class="menu-logout" type="button" (click)="logout()">Log Out</button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </header>
+
+  <!-- REDESIGNED SMOOTH MOBILE SLIDE-OUT DROPDOWN DRAWER (PHONE VIEW) -->
+  <div class="mobile-menu-overlay phone-only" *ngIf="mobileMenuOpen()" (click)="closeMobileMenu()">
+    <aside class="mobile-menu-panel" aria-label="Player menu" (click)="$event.stopPropagation()">
+      <div class="mobile-menu-top">
+        <div class="mobile-brand-box">
+          <img src="/assets/icons/betzion-app-icon.svg" class="brand-logo" alt="Betzion">
+          <span class="mobile-menu-brand">VEX<span>BET</span></span>
+        </div>
+        <button type="button" class="mobile-menu-close" aria-label="Close menu" (click)="closeMobileMenu()">&times;</button>
+      </div>
+
+      <div class="mobile-menu-player" *ngIf="isAuthenticated" (click)="closeMobileMenu(); openAccountModal()">
+        <span class="mobile-menu-avatar">{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+        <div class="mobile-player-meta">
+          <strong>{{ currentUser()?.username || 'Player' }}</strong>
+          <small class="bal-green">Balance: KES {{ userBalance() | number:'1.2-2' }}</small>
+        </div>
+        <span class="player-chevron">›</span>
+      </div>
+
+      <nav class="mobile-menu-list" aria-label="Betzion Functionalities Navigation">
+        <p class="mobile-menu-heading">Betzion Features</p>
+        
+        <button type="button" class="menu-card-btn" (click)="closeMobileMenu(); setNavTab('home')">
+          <span class="mobile-item-title">Sportsbook</span>
+          <small class="mobile-item-sub">Live football odds & matches</small>
+        </button>
+
+        <button type="button" class="menu-card-btn" (click)="closeMobileMenu(); setNavTab('live')">
+          <span class="mobile-item-title">Live Odds</span>
+          <small class="mobile-item-sub">In-play matches (179 live)</small>
+        </button>
+
+        <button type="button" class="menu-card-btn mobile-menu-aviator-btn" (click)="goToAviator()">
+          <div>
+            <span class="mobile-item-title aviator-title">Aviator Game</span>
+            <small class="mobile-item-sub">Crash game — cash out live</small>
+          </div>
+          <span class="mobile-hot-badge">HOT</span>
+        </button>
+
+        <button type="button" class="menu-card-btn" (click)="closeMobileMenu(); openMyBetsModal()">
+          <span class="mobile-item-title">My Bets &amp; Slips</span>
+          <small class="mobile-item-sub">View active & settled wagers</small>
+        </button>
+
+        <button type="button" class="menu-card-btn deposit-card-btn" (click)="openDeposit()">
+          <span class="mobile-item-title deposit-title">Deposit via M-Pesa</span>
+          <small class="mobile-item-sub">Instant M-Pesa STK push</small>
+        </button>
+      </nav>
+
+      <section class="mobile-menu-section" aria-label="Account actions">
+        <p class="mobile-menu-heading">Account &amp; Support</p>
+        <button type="button" class="action-row-btn" (click)="closeMobileMenu(); openAccountModal()">
+          <span>My Account Details</span>
+          <span class="chevron-right">›</span>
+        </button>
+        <button type="button" class="action-row-btn logout-btn" (click)="logout()" *ngIf="isAuthenticated">
+          <span>Log Out</span>
+          <span class="chevron-right">›</span>
+        </button>
+      </section>
+    </aside>
+  </div>
+
+  <!-- MOBILE SPORTS CHIPS HORIZONTAL SCROLLBAR (PHONE VIEW) -->
+  <div class="mobile-sports-ribbon phone-only">
+    <button class="sports-chip chip-aviator" (click)="goToAviator()">
+      <span>Aviator</span>
+      <span class="chip-badge">HOT</span>
+    </button>
+    <button *ngFor="let sport of sportsList" 
+            class="sports-chip" 
+            [class.active]="selectedSport() === sport.id" 
+            (click)="selectSport(sport.id)">
+      <span>{{ sport.name }}</span>
+      <span class="chip-count" *ngIf="sport.count">{{ sport.count }}</span>
+    </button>
+  </div>
+
+  <!-- 3-COLUMN / RESPONSIVE SPORTSBOOK CONTAINER -->
+  <div class="sportsbook-container">
+    
+    <!-- LEFT COLUMN: SPORTS CATEGORIES MENU (LAPTOP VIEW) -->
+    <aside class="sports-sidebar laptop-only" aria-label="Sports list">
+      <div class="sports-menu-title">SPORTS CATEGORIES</div>
+      <ul class="sports-menu-list">
+        <li *ngFor="let sport of sportsList" [class.active]="selectedSport() === sport.id">
+          <button type="button" (click)="selectSport(sport.id)">
+            <span class="sport-name">{{ sport.name }}</span>
+            <span class="sport-count" *ngIf="sport.count">{{ sport.count }}</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- CENTER MAIN CONTENT AREA -->
+    <main class="main-center-content">
+
+      <!-- SUB-NAV BAR (LAPTOP VIEW) -->
+      <div class="sub-nav-bar laptop-only">
+        <div class="sub-nav-tabs">
+          <button class="active" type="button">Highlights</button>
+          <button type="button">Upcoming</button>
+          <button type="button">Countries</button>
+          <button type="button">Zoom Soccer</button>
+        </div>
+        <div class="sub-nav-filters">
+          <button type="button" class="filter-btn">Filters <span>⌄</span></button>
+          <button type="button" class="filter-btn">Today <span>⌄</span></button>
+          <button type="button" class="filter-btn">1x2 <span>⌄</span></button>
+        </div>
+      </div>
+
+      <!-- SECTION 1: MOVING BETZION PROMO PICTURES BANNER -->
+      <section class="promo-banner-card">
+        <div class="promo-window" aria-label="Betzion promotions">
+          <div class="promo-track">
+            <div class="promo-slide" *ngFor="let promo of promoImages" (click)="goToAviator()">
+              <div class="promo-img-box">
+                <img [src]="promo.img" [alt]="promo.title">
+                <div class="promo-content-overlay">
+                  <span class="promo-tag-pill">{{ promo.tag }}</span>
+                  <div class="promo-title-brand">
+                    <span *ngIf="promo.title.includes('AVIATOR')" class="promo-plane-badge">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                    </span>
+                    <h3 class="promo-main-title">
+                      <span class="p-white">VEX</span><span class="p-gold">BET</span>
+                      <span *ngIf="promo.title.includes('AVIATOR')" class="p-red"> AVIATOR</span>
+                      <span *ngIf="promo.title.includes('FOOTBALL')" class="p-white"> FOOTBALL</span>
+                    </h3>
+                  </div>
+                  <button type="button" class="promo-play-btn">PLAY NOW</button>
+                </div>
+              </div>
+            </div>
+            <div class="promo-slide" *ngFor="let promo of promoImages" aria-hidden="true" (click)="goToAviator()">
+              <div class="promo-img-box">
+                <img [src]="promo.img" [alt]="promo.title">
+                <div class="promo-content-overlay">
+                  <span class="promo-tag-pill">{{ promo.tag }}</span>
+                  <div class="promo-title-brand">
+                    <span *ngIf="promo.title.includes('AVIATOR')" class="promo-plane-badge">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                    </span>
+                    <h3 class="promo-main-title">
+                      <span class="p-white">VEX</span><span class="p-gold">BET</span>
+                      <span *ngIf="promo.title.includes('AVIATOR')" class="p-red"> AVIATOR</span>
+                      <span *ngIf="promo.title.includes('FOOTBALL')" class="p-white"> FOOTBALL</span>
+                    </h3>
+                  </div>
+                  <button type="button" class="promo-play-btn">PLAY NOW</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: DISTINCT AVIATOR STRIP WITH GREEN RING CIRCULAR LOGO (3 ACTIVE ROOMS REMOVED) -->
+      <section class="aviator-banner-strip" (click)="goToAviator()" aria-label="Aviator feature">
+        <div class="banner-logo-wrap">
+          <div class="banner-logo-circle">
+            <img src="/assets/images/bets-aviator-button.jpg" alt="Aviator Logo" class="banner-logo-img">
+          </div>
+          <span class="banner-logo-text">Aviator</span>
+        </div>
+
+        <div class="banner-text-center">
+          <div class="banner-badge-row">
+            <span class="banner-live-dot"></span>
+            <span class="banner-provably">PROVABLY FAIR</span>
+          </div>
+          <p class="banner-tagline">Cash out before the plane flies away!</p>
+        </div>
+
+        <button class="banner-play-btn" type="button" (click)="goToAviator(); $event.stopPropagation()">
+          <span>Play Now</span>
+        </button>
+      </section>
+
+      <!-- SCROLLABLE FOOTBALL ODDS SECTION WITH DYNAMIC CHANGING ODDS -->
+      <section class="odds-section">
+        <div class="odds-section-header">
+          <div class="odds-header-left">
+            <span class="section-title">Football</span>
+            <span class="section-count">{{ visibleMatches().length }} matches</span>
+          </div>
+          <div class="odds-header-filters">
+            <button [class.f-active]="activeFilter() === 'all'" (click)="activeFilter.set('all')">All</button>
+            <button [class.f-active]="activeFilter() === 'live'" (click)="activeFilter.set('live')">
+              <span class="dot-live"></span> Live
+            </button>
+            <button [class.f-active]="activeFilter() === 'upcoming'" (click)="activeFilter.set('upcoming')">Upcoming</button>
+          </div>
+          <div class="odds-col-labels">
+            <span>1</span><span>X</span><span>2</span>
+          </div>
+        </div>
+
+        <!-- LONG SCROLLABLE MATCHES LIST (NON-OBVIOUS TEAMS) -->
+        <div class="scrollable-odds-container">
+          <div class="betika-odds-table">
+            <div class="betika-match-row" *ngFor="let game of visibleMatches(); let i = index">
+              <div class="brow-left">
+                <div class="brow-top-line">
+                  <span class="brow-league">{{ game.league }}</span>
+                  <span class="brow-time" [class.brow-live]="game.state === 'live'">
+                    <span class="brow-live-dot" *ngIf="game.state === 'live'"></span>
+                    {{ game.time }}
+                  </span>
+                </div>
+                <div class="brow-teams">
+                  <span class="brow-home">{{ game.home }}</span>
+                  <span class="brow-sep">v</span>
+                  <span class="brow-away">{{ game.away }}</span>
+                </div>
+                <div class="brow-markets-link">+{{ game.marketsCount }} markets</div>
+              </div>
+
+              <div class="brow-odds">
+                <button type="button" class="b-odd-tile" [class.b-odd-sel]="isSelected(game.id, 'home')" (click)="toggleSelection(game, 'home')">
+                  <span class="b-odd-label">1</span>
+                  <strong class="b-odd-val">{{ game.homeOdds | number:'1.2-2' }}</strong>
+                </button>
+                <button type="button" class="b-odd-tile" [class.b-odd-sel]="isSelected(game.id, 'draw')" (click)="toggleSelection(game, 'draw')">
+                  <span class="b-odd-label">X</span>
+                  <strong class="b-odd-val">{{ game.drawOdds | number:'1.2-2' }}</strong>
+                </button>
+                <button type="button" class="b-odd-tile" [class.b-odd-sel]="isSelected(game.id, 'away')" (click)="toggleSelection(game, 'away')">
+                  <span class="b-odd-label">2</span>
+                  <strong class="b-odd-val">{{ game.awayOdds | number:'1.2-2' }}</strong>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER COMPLIANCE & SUPPORT -->
+      <footer class="trust-footer">
+        <div class="footer-brand-header">
+          <img src="/assets/icons/betzion-app-icon.svg" class="brand-logo" alt="Betzion">
+          <h2 class="footer-brand-title">VEX<span class="brand-accent">BET</span></h2>
+        </div>
+
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h3 class="footer-heading">CONTACT US</h3>
+            <div class="contact-card-list">
+              <a href="tel:0747112112" class="contact-pill">
+                <span class="contact-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.053 15.053 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.5 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg>
+                </span>
+                <div class="contact-text">
+                  <small>Customer Care</small>
+                  <strong>0747112112</strong>
+                </div>
+              </a>
+              <a href="mailto:customercare@betzion.site" class="contact-pill">
+                <span class="contact-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </span>
+                <div class="contact-text">
+                  <small>Email Support</small>
+                  <strong>customercare&#64;betzion.site</strong>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h3 class="footer-heading">SUPPORT AND TRUST</h3>
+            <nav class="support-links">
+              <a href="#">FAQ &amp; Help Center</a>
+              <a href="#">How to Play Aviator</a>
+              <a href="#">Terms and Conditions</a>
+              <a href="#">Responsible Gaming</a>
+              <a href="#">Privacy Policy</a>
+            </nav>
+          </div>
+
+          <div class="footer-col">
+            <h3 class="footer-heading">LEGAL &amp; COMPLIANCE</h3>
+            <p class="compliance-text">Must be 18 years of age or older to register or play at Betzion.</p>
+            <p class="compliance-text">Gambling can be addictive if not done in moderation.</p>
+            <div class="licence-box">
+              <span class="licence-label">BCLB LICENCE</span>
+              <strong class="licence-val">BCLB-BK-0001257</strong>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    </main>
+
+    <!-- RIGHT COLUMN: BET SLIP PANEL (LAPTOP VIEW) -->
+    <aside class="betslip-sidebar laptop-only" aria-label="Bet slip panel">
+      <div class="betslip-tabs-bar">
+        <button type="button" class="active">Normal ({{ selections().length }})</button>
+        <button type="button">Virtuals (0)</button>
+      </div>
+
+      <div class="shared-code-card">
+        <div class="shared-code-title">Do you have a shared betslip code? Enter it here.</div>
+        <div class="code-input-row">
+          <input type="text" [(ngModel)]="betslipCode" placeholder="e.g. VBmSU" class="code-input-field">
+          <button type="button" class="load-betslip-btn" (click)="loadBetslipByCode()">Load Betslip</button>
+        </div>
+      </div>
+
+      <div class="betslip-content">
+        <div class="empty-slip-state" *ngIf="!selections().length">
+          <div class="empty-icon">+</div>
+          <strong>Your slip is empty</strong>
+          <p>Click any odd on the sports board to add your prediction here.</p>
+        </div>
+
+        <div class="slip-active-state" *ngIf="selections().length">
+          <div class="slip-header-row">
+            <span class="picks-count">{{ selections().length }} Selection{{ selections().length > 1 ? 's' : '' }}</span>
+            <button type="button" class="clear-all-btn" (click)="clearSlip()">Clear All</button>
+          </div>
+
+          <div class="selections-list">
+            <article class="slip-item" *ngFor="let item of selections()">
+              <button type="button" class="remove-item-btn" (click)="removeSelection(item)" aria-label="Remove pick">×</button>
+              <div class="item-match-title">{{ item.matchLabel }}</div>
+              <div class="item-outcome-row">
+                <strong class="item-outcome-name">{{ item.outcomeLabel }}</strong>
+                <span class="item-odds-value">{{ item.odds | number:'1.2-2' }}</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="slip-stake-section">
+            <label class="stake-label">
+              <span>Stake Amount</span>
+              <div class="stake-input-box">
+                <span class="currency-prefix">KES</span>
+                <input type="number" min="10" [(ngModel)]="stake" class="stake-input-field">
+              </div>
+            </label>
+          </div>
+
+          <div class="slip-totals-card">
+            <div class="total-row">
+              <span>Total Odds</span>
+              <strong>{{ combinedOdds() | number:'1.2-2' }}</strong>
+            </div>
+            <div class="total-row return-row">
+              <span>Possible Win</span>
+              <strong class="return-amount">KES {{ potentialReturn() | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <button class="place-bet-btn" type="button" (click)="placeDemoBet()">Place Bet</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- MY BETS MODAL / OVERLAY -->
+  <div class="modal-backdrop" *ngIf="showMyBetsModal()" (click)="closeMyBetsModal()">
+    <section class="content-modal my-bets-modal" role="dialog" aria-modal="true" aria-label="My Bets" (click)="$event.stopPropagation()">
+      <div class="cmodal-header">
+        <h2>My Bets</h2>
+        <button class="cmodal-close" type="button" (click)="closeMyBetsModal()">&times;</button>
+      </div>
+
+      <div class="cmodal-tabs">
+        <button type="button" [class.active]="myBetsTab() === 'active'" (click)="myBetsTab.set('active')">Active Bets (0)</button>
+        <button type="button" [class.active]="myBetsTab() === 'settled'" (click)="myBetsTab.set('settled')">Settled Bets (0)</button>
+      </div>
+
+      <div class="cmodal-body">
+        <div class="empty-bets-state">
+          <div class="empty-bets-icon">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg>
+          </div>
+          <strong>No {{ myBetsTab() }} bets found</strong>
+          <p>You don't have any {{ myBetsTab() }} bets right now. Select odds from the sportsbook to place your bet!</p>
+          <button type="button" class="explore-btn" (click)="closeMyBetsModal(); setNavTab('home')">Explore Matches</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ACCOUNT DETAILS MODAL / OVERLAY -->
+  <div class="modal-backdrop" *ngIf="showAccountModal()" (click)="closeAccountModal()">
+    <section class="content-modal account-modal" role="dialog" aria-modal="true" aria-label="My Account" (click)="$event.stopPropagation()">
+      <div class="cmodal-header">
+        <h2>My Account</h2>
+        <button class="cmodal-close" type="button" (click)="closeAccountModal()">&times;</button>
+      </div>
+
+      <div class="cmodal-body">
+        <div class="account-card">
+          <span class="account-avatar">{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+          <div class="account-info">
+            <strong>{{ currentUser()?.username || 'Player' }}</strong>
+            <span class="acc-phone" *ngIf="currentUser()?.phone_number">{{ currentUser()?.phone_number }}</span>
+            <span class="acc-bal">Available Balance: <strong>KES {{ userBalance() | number:'1.2-2' }}</strong></span>
+          </div>
+        </div>
+
+        <div class="account-actions-list">
+          <button type="button" class="acc-action-btn deposit-highlight" (click)="closeAccountModal(); openDeposit()">
+            <span>Deposit Funds (M-Pesa STK)</span>
+            <span class="acc-action-icon" style="display: flex; align-items: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            </span>
+          </button>
+          <button type="button" class="acc-action-btn" (click)="closeAccountModal(); goToWallet()">
+            <span>Wallet &amp; Withdrawals</span>
+            <span>›</span>
+          </button>
+          <button type="button" class="acc-action-btn" (click)="closeAccountModal(); openMyBetsModal()">
+            <span>Betting History</span>
+            <span>›</span>
+          </button>
+          <button type="button" class="acc-action-btn logout-acc-btn" (click)="closeAccountModal(); logout()" *ngIf="isAuthenticated">
+            <span>Log Out</span>
+            <span>›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FIXED BOTTOM NAVIGATION BAR WITH CENTER CIRCULAR AVIATOR BUTTON -->
+  <nav class="bottom-nav-bar">
+    <button type="button" [class.active]="activeNavTab() === 'home'" (click)="setNavTab('home')">
+      <span class="nav-label">HOME</span>
+    </button>
+    <button type="button" [class.active]="activeNavTab() === 'live'" (click)="setNavTab('live')">
+      <span class="nav-label">LIVE</span>
+    </button>
+
+    <!-- CENTER CIRCULAR AVIATOR BUTTON -->
+    <button type="button" class="center-aviator-btn" (click)="goToAviator()">
+      <div class="aviator-green-ring">
+        <img class="aviator-btn-img" src="/assets/images/bets-aviator-button.jpg" alt="Aviator">
+      </div>
+      <span class="aviator-text">Aviator</span>
+    </button>
+
+    <button type="button" (click)="openMyBetsModal()">
+      <span class="nav-label">MY BETS</span>
+    </button>
+    <button type="button" (click)="openAccountModal()">
+      <span class="nav-label">ACCOUNT</span>
+    </button>
+  </nav>
+
+</div>

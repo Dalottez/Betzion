@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: betzion-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # Render assigns PORT itself; server.js already reads process.env.PORT.
+      # Every value below is a secret or environment-specific, so it is set in
+      # the Render dashboard rather than committed here.
+      - key: NODE_VERSION
+        value: 22
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: betzion
+      - key: JWT_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ARCHPAY_API_BASE
+        value: https://pay.archietech.app/api/v1
+      - key: ARCHPAY_API_KEY
+        sync: false
+      - key: ARCHPAY_ACCOUNT_ID
+        sync: false
+      - key: ARCHPAY_CHANNEL_ID
+        sync: false
+      - key: ARCHPAY_CALLBACK_URL
+        sync: false
+      - key: ARCHPAY_CALLBACK_TOKEN
+        sync: false
+      - key: ARCHPAY_PENDING_PAYMENT_EXPIRY_MS
+        value: "300000"
+      - key: ARCHPAY_LATE_CONFIRMATION_WINDOW_MS
+        value: "1800000"
+      - key: MIN_DEPOSIT_AMOUNT
+        value: "999"
+      - key: MAX_DEPOSIT_AMOUNT
+        value: "1999"
+      - key: SEED_ADMIN_PHONE
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: SEED_ADMIN_USERNAME
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false

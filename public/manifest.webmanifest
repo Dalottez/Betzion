@@ -1,0 +1,19 @@
+{
+  "name": "Betzion",
+  "short_name": "Betzion",
+  "description": "Betzion games and Aviator.",
+  "start_url": "/bets",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101722",
+  "theme_color": "#101722",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/icons/betzion-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

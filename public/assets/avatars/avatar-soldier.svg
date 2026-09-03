@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg-soldier" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1f2421"/>
+      <stop offset="100%" stop-color="#0a0c0a"/>
+    </radialGradient>
+    <linearGradient id="helmet-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a554a"/>
+      <stop offset="50%" stop-color="#2d372e"/>
+      <stop offset="100%" stop-color="#1a201b"/>
+    </linearGradient>
+    <linearGradient id="visor-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="40%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg-soldier)"/>
+  <!-- Shoulders / tactical vest -->
+  <path d="M15,95 C18,72 32,68 50,68 C68,68 82,72 85,95 Z" fill="#1e241f"/>
+  <path d="M35,72 L65,72 L60,95 L40,95 Z" fill="#2d372e"/>
+  <!-- Head / Balaclava -->
+  <path d="M28,45 C28,30 38,24 50,24 C62,24 72,30 72,45 C72,62 64,72 50,72 C36,72 28,62 28,45 Z" fill="#181d19"/>
+  <!-- Tactical Helmet -->
+  <path d="M22,38 C22,20 34,12 50,12 C66,12 78,20 78,38 C78,42 74,45 68,44 C65,36 35,36 32,44 C26,45 22,42 22,38 Z" fill="url(#helmet-grad)"/>
+  <!-- Helmet straps and NVG mount -->
+  <rect x="46" y="15" width="8" height="12" rx="2" fill="#0f1410"/>
+  <path d="M26,38 L32,62 L36,62 L32,38 Z" fill="#111612"/>
+  <path d="M74,38 L68,62 L64,62 L68,38 Z" fill="#111612"/>
+  <!-- Goggles / Visor -->
+  <path d="M30,38 C30,34 70,34 70,38 C70,47 62,49 50,49 C38,49 30,47 30,38 Z" fill="url(#visor-grad)"/>
+  <path d="M34,39 C34,37 66,37 66,39 C66,45 60,46 50,46 C40,46 34,45 34,39 Z" fill="#0284c7" opacity="0.7"/>
+  <!-- Goggle highlight -->
+  <line x1="38" y1="41" x2="48" y2="41" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+</svg>

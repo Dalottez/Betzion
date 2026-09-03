@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg-hair" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a3036"/>
+      <stop offset="100%" stop-color="#111417"/>
+    </radialGradient>
+    <linearGradient id="copper-hair" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="40%" stop-color="#c2410c"/>
+      <stop offset="70%" stop-color="#9a3412"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg-hair)"/>
+  <!-- White shirt / shoulders from behind -->
+  <path d="M12,95 C18,74 32,70 50,70 C68,70 82,74 88,95 Z" fill="#f8fafc"/>
+  <path d="M36,72 C44,78 56,78 64,72 C58,84 42,84 36,72 Z" fill="#e2e8f0"/>
+  <!-- Voluminous copper / brown hair from behind -->
+  <path d="M24,42 C20,24 34,14 50,14 C66,14 80,24 76,42 C78,58 72,74 65,80 C58,74 62,64 54,68 C46,64 50,74 42,78 C32,70 22,58 24,42 Z" fill="url(#copper-hair)"/>
+  <!-- Hair waves / texture -->
+  <path d="M38,22 C48,26 56,36 50,48 C42,42 40,30 38,22 Z" fill="#f97316" opacity="0.8"/>
+  <path d="M60,24 C52,30 48,42 56,54 C64,48 66,34 60,24 Z" fill="#c2410c" opacity="0.9"/>
+  <path d="M30,36 C26,48 32,60 38,66 C34,56 30,46 30,36 Z" fill="#ea580c" opacity="0.75"/>
+  <path d="M70,36 C74,48 68,60 62,66 C66,56 70,46 70,36 Z" fill="#9a3412" opacity="0.85"/>
+  <path d="M42,50 C50,56 52,68 46,74 C40,68 40,58 42,50 Z" fill="#f97316" opacity="0.7"/>
+</svg>

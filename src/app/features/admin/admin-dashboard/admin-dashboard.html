@@ -1,0 +1,689 @@
+<main class="admin-shell">
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="admin-header">
+    <div class="brand-block">
+      <div class="brand-logo">{{ isSuperAdmin ? '👑 BETZION SUPERADMIN' : '🛡️ BETZION ADMIN' }}</div>
+      <span class="eyebrow">{{ isSuperAdmin ? 'Superadmin Master Console' : 'Enterprise Control Center' }}</span>
+    </div>
+
+    <!-- DESKTOP TABS -->
+    <div class="admin-tab-bar desktop-only">
+      <button [class.active]="activeTab === 'monitor'" (click)="setTab('monitor')">⚡ Engine Monitor</button>
+      <button [class.active]="activeTab === 'withdrawal-settings'" (click)="setTab('withdrawal-settings')">Withdrawal Settings</button>
+      <button [class.active]="activeTab === 'active-users'" (click)="setTab('active-users')">
+        🟢 Active Users & Wagers
+        <span *ngIf="pendingWithdrawalsList.length > 0" class="badge-count">{{ pendingWithdrawalsList.length }}</span>
+      </button>
+      <button [class.active]="activeTab === 'transactions'" (click)="setTab('transactions')">💳 Transactions</button>
+      <button [class.active]="activeTab === 'users'" (click)="setTab('users')">👥 Users</button>
+      <button *ngIf="isSuperAdmin" [class.active]="activeTab === 'admins'" (click)="setTab('admins')">🔑 Admins</button>
+      <button [class.active]="activeTab === 'logs'" (click)="setTab('logs')">📜 Audit Logs</button>
+    </div>
+
+    <div class="header-right">
+      <span class="connection-pill" [class.connected]="isConnected$ | async">
+        {{ (isConnected$ | async) ? 'Live Socket' : 'Offline' }}
+      </span>
+
+      <button class="nav-btn outline" (click)="backToGame()">🎮 Game View</button>
+
+      <!-- MOBILE HAMBURGER BUTTON -->
+      <button class="hamburger-btn mobile-only" (click)="toggleMobileMenu()">
+        ☰
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE NAVIGATION DROPDOWN -->
+  <nav class="mobile-nav-menu" *ngIf="mobileMenuOpen">
+    <button [class.active]="activeTab === 'withdrawal-settings'" (click)="setTab('withdrawal-settings')">Withdrawal Settings</button>
+    <button [class.active]="activeTab === 'monitor'" (click)="setTab('monitor')">⚡ Engine Monitor</button>
+    <button [class.active]="activeTab === 'active-users'" (click)="setTab('active-users')">🟢 Active Users & Wagers ({{ pendingWithdrawalsList.length }})</button>
+    <button [class.active]="activeTab === 'transactions'" (click)="setTab('transactions')">💳 Transactions</button>
+    <button [class.active]="activeTab === 'users'" (click)="setTab('users')">👥 Users</button>
+    <button *ngIf="isSuperAdmin" [class.active]="activeTab === 'admins'" (click)="setTab('admins')">🔑 Admins</button>
+    <button [class.active]="activeTab === 'logs'" (click)="setTab('logs')">📜 Audit Logs</button>
+    <button class="logout-btn" (click)="logout()">🚪 Logout</button>
+  </nav>
+
+  <!-- OVERVIEW STATS CARDS BAR -->
+  <section class="stats-bar">
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <span class="stat-label">Online Players</span>
+        <strong class="stat-val">{{ stats.connectedPlayers }} Connected ({{ stats.onlineUsers }} Users)</strong>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon">💰</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Deposits</span>
+        <strong class="stat-val">{{ stats.totalDeposits | number:'1.2-2' }} KES</strong>
+      </div>
+    </div>
+
+    <div class="stat-card gold">
+      <div class="stat-icon">💸</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Withdrawals</span>
+        <strong class="stat-val">{{ stats.totalWithdrawals | number:'1.2-2' }} KES</strong>
+      </div>
+    </div>
+
+    <div class="stat-card purple">
+      <div class="stat-icon">🎲</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Volume</span>
+        <strong class="stat-val">{{ stats.totalVolume | number:'1.2-2' }} KES</strong>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="error$ | async as error" class="error-banner">
+    {{ error }}
+  </section>
+
+  <!-- TAB 1: ENGINE & NEXT CRASH MONITOR -->
+  <ng-container *ngIf="activeTab === 'monitor'">
+    <div class="monitor-phone-frame">
+      <ng-container *ngIf="nextRound$ | async as nextRound">
+        <section class="monitor-grid">
+        <!-- NEXT CRASH HERO CARD -->
+        <article class="panel hero-panel glow-crimson">
+          <div class="panel-title-row">
+            <span class="panel-kicker">Next Round (Pre-Calculated Seed & Hash)</span>
+            <span class="status-chip" [class.running]="nextRound.status === 'Running'" [class.crashed]="nextRound.status === 'Crashed'">
+              {{ nextRound.status }}
+            </span>
+          </div>
+
+          <div class="next-crash-box">
+            <span class="next-crash-label">NEXT CRASH MULTIPLIER</span>
+            <div class="crash-value">{{ formatMultiplier(nextRound.nextCrashPoint) }}</div>
+          </div>
+
+          <dl class="detail-grid">
+            <div>
+              <dt>Next Round ID</dt>
+              <dd>#{{ nextRound.nextRoundId || '--' }}</dd>
+            </div>
+            <div>
+              <dt>Countdown</dt>
+              <dd class="highlight">{{ formatCountdown(nextRound.countdownMs) }}</dd>
+            </div>
+            <div>
+              <dt>Time Generated</dt>
+              <dd>{{ nextRound.generatedAt ? (nextRound.generatedAt | date:'mediumTime') : '--' }}</dd>
+            </div>
+            <div class="wide">
+              <dt>SHA-256 HMAC Hash</dt>
+              <dd class="mono text-truncate">{{ nextRound.hash || '--' }}</dd>
+            </div>
+            <div class="wide">
+              <dt>Server Seed</dt>
+              <dd class="mono text-truncate">{{ nextRound.serverSeed || '--' }}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <!-- CURRENT ROUND LIVE MONITOR -->
+        <article class="panel current-panel" *ngIf="currentRound$ | async as currentRound">
+          <div class="panel-title-row">
+            <span class="panel-kicker">Live Game Engine Monitor</span>
+            <span class="status-chip" [class.running]="currentRound.status === 'Running'" [class.crashed]="currentRound.status === 'Crashed'">
+              {{ currentRound.status }}
+            </span>
+          </div>
+
+          <div class="stat-list-grid">
+            <div class="stat-box">
+              <span>Live Multiplier</span>
+              <strong class="text-gold">{{ currentRound.currentMultiplier | number:'1.2-2' }}x</strong>
+            </div>
+            <div class="stat-box">
+              <span>Active Bets</span>
+              <strong>{{ currentRound.numberOfBets }}</strong>
+            </div>
+            <div class="stat-box">
+              <span>Total Stake</span>
+              <strong>{{ currentRound.totalStake | number:'1.2-2' }} KES</strong>
+            </div>
+            <div class="stat-box">
+              <span>Est. Payout</span>
+              <strong>{{ currentRound.estimatedPayout | number:'1.2-2' }} KES</strong>
+            </div>
+          </div>
+        </article>
+        </section>
+      </ng-container>
+
+      <!-- PREVIOUS ROUND SUMMARY -->
+      <section class="panel margin-top" *ngIf="previousRound$ | async as prev">
+        <div class="panel-title-row">
+          <h3>Previous Round Summary (#{{ prev.roundId || '--' }})</h3>
+          <span class="crash-badge" *ngIf="prev.crashPoint">{{ prev.crashPoint | number:'1.2-2' }}x</span>
+        </div>
+
+        <div class="summary-metrics">
+          <div><span>Bets Placed:</span> <strong>{{ prev.totalBets }}</strong></div>
+          <div><span>Total Stake:</span> <strong>{{ prev.totalStake | number:'1.2-2' }} KES</strong></div>
+          <div><span>Total Payout:</span> <strong>{{ prev.totalPayout | number:'1.2-2' }} KES</strong></div>
+          <div><span>Winners:</span> <strong class="text-green">{{ prev.winnerCount }}</strong></div>
+          <div><span>Losers:</span> <strong class="text-red">{{ prev.loserCount }}</strong></div>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+
+  <!-- WITHDRAWAL SETTINGS -->
+  <ng-container *ngIf="activeTab === 'withdrawal-settings'">
+    <section class="panel withdrawal-rule-panel">
+      <div class="panel-title-row">
+        <div>
+          <h2>Withdrawal Settings</h2>
+          <p class="panel-desc">New withdrawal requests are always held for admin review. A request can be completed only if the player meets the wager requirement below.</p>
+        </div>
+      </div>
+
+      <div class="withdrawal-settings-grid">
+        <div class="form-group">
+          <label for="withdrawalSettingsWagerRequirement">Minimum total wager (KES)</label>
+          <input
+            id="withdrawalSettingsWagerRequirement"
+            type="number"
+            min="0"
+            step="1"
+            class="styled-input"
+            [(ngModel)]="withdrawalWagerRequirement"
+            [disabled]="isSavingWithdrawalWagerRequirement"
+          />
+          <p class="template-help">Set to 0 to remove the wager limit. The request will still require admin approval.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="withdrawalSettingsPopupTitle">Popup title for a new withdrawal request</label>
+          <input
+            id="withdrawalSettingsPopupTitle"
+            type="text"
+            maxlength="100"
+            class="styled-input"
+            [(ngModel)]="withdrawalInitiationTitle"
+            [disabled]="isSavingWithdrawalWagerRequirement"
+          />
+        </div>
+
+        <div class="form-group full-span">
+          <label for="withdrawalSettingsPopupMessage">Popup message template</label>
+          <textarea
+            id="withdrawalSettingsPopupMessage"
+            rows="6"
+            maxlength="2000"
+            class="styled-textarea"
+            [(ngModel)]="withdrawalInitiationMessage"
+            [disabled]="isSavingWithdrawalWagerRequirement"
+          ></textarea>
+          <p class="template-help">This exact title and message are shown automatically to every player as soon as they press Withdraw.</p>
+        </div>
+      </div>
+
+      <button class="action-btn gold margin-top" (click)="saveWithdrawalWagerRequirement()" [disabled]="isSavingWithdrawalWagerRequirement">
+        {{ isSavingWithdrawalWagerRequirement ? 'SAVING...' : 'SAVE WITHDRAWAL SETTINGS' }}
+      </button>
+    </section>
+  </ng-container>
+
+  <!-- TAB 2: DEPOSITS AND WITHDRAWALS (SEPARATE VIEWS) -->
+  <ng-container *ngIf="activeTab === 'transactions'">
+    <section class="panel">
+      <div class="panel-title-row flex-wrap">
+        <div>
+          <h2>Transactions</h2>
+          <p class="panel-desc">Recent processed transactions.</p>
+        </div>
+        
+        <div class="filter-controls">
+          <div class="select-wrap">
+            <select [(ngModel)]="txStatusFilter" (change)="fetchTransactions()" class="styled-select">
+              <option value="all">All Statuses</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+
+          <div class="search-wrap">
+            <input type="text" [(ngModel)]="txSearchQuery" (keyup.enter)="fetchTransactions()" placeholder="Search username or phone..." class="styled-input" />
+            <button (click)="fetchTransactions()" class="action-btn">Search</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Tx ID</th>
+              <th>User</th>
+              <th>Phone</th>
+              <th>Amount (KES)</th>
+              <th>Reference / Receipt</th>
+              <th>Status</th>
+              <th>Date & Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of transactionsList">
+              <td class="mono">#{{ tx.id }}</td>
+              <td><strong>{{ tx.username }}</strong></td>
+              <td>{{ tx.phone_number || '--' }}</td>
+              <td><strong>{{ tx.amount | number:'1.2-2' }} KES</strong></td>
+              <td class="mono text-xs">{{ tx.reference || '--' }}</td>
+              <td>
+                <span class="status-badge" [class.completed]="tx.status === 'completed'" [class.failed]="tx.status === 'failed'" [class.pending]="tx.status === 'pending'">
+                  {{ tx.status | uppercase }}
+                </span>
+              </td>
+              <td class="text-xs">{{ tx.created_at | date:'medium' }}</td>
+            </tr>
+            <tr *ngIf="transactionsList.length === 0">
+              <td colspan="7" class="text-center padding-lg text-muted">No matching transactions found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- TAB 3: USER MANAGEMENT -->
+  <ng-container *ngIf="activeTab === 'users'">
+    <section class="panel">
+      <div class="panel-title-row flex-wrap">
+        <h2>User Account Management</h2>
+
+        <div class="filter-controls">
+          <select [(ngModel)]="roleFilter" (change)="fetchUsers()" class="styled-select">
+            <option value="all">All Roles</option>
+            <option value="user">Players</option>
+            <option value="admin">Admins</option>
+          </select>
+
+          <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="fetchUsers()" placeholder="Search username..." class="styled-input" />
+          <button (click)="fetchUsers()" class="action-btn">Filter</button>
+          <button (click)="exportUsersCSV()" class="action-btn gold">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Balance (KES)</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of userList">
+              <td class="mono">#{{ u.id }}</td>
+              <td><strong>{{ u.username }}</strong></td>
+              <td>{{ u.phone_number || '--' }}</td>
+              <td>
+                <span class="role-badge" [class.superadmin]="u.role === 'superadmin'" [class.admin]="u.role === 'admin'">
+                  {{ u.role | uppercase }}
+                </span>
+              </td>
+              <td><strong>{{ u.balance | number:'1.2-2' }} KES</strong></td>
+              <td>
+                <span class="status-badge" [class.failed]="u.is_suspended" [class.completed]="!u.is_suspended">
+                  {{ u.is_suspended ? 'SUSPENDED' : 'ACTIVE' }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group-sm">
+                  <button class="sm-btn gold" (click)="adjustBalance(u)" title="Adjust Balance">± Balance</button>
+                  <button class="sm-btn orange" (click)="toggleSuspend(u)">{{ u.is_suspended ? 'Activate' : 'Suspend' }}</button>
+                  <button class="sm-btn blue" (click)="resetPassword(u)" title="Reset Password">Key</button>
+                  <button *ngIf="isSuperAdmin && u.role === 'user'" class="sm-btn purple" (click)="setUserRole(u, 'admin')" [disabled]="isSettingRole === u.id" title="Promote to Admin">+ Admin</button>
+                  <button *ngIf="isSuperAdmin && u.role === 'admin'" class="sm-btn orange" (click)="setUserRole(u, 'user')" [disabled]="isSettingRole === u.id" title="Demote to User">- User</button>
+                  <button class="sm-btn red" (click)="deleteUser(u)" title="Delete Account">✕</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- TAB 4: OTHER ADMINS MANAGEMENT (SUPERADMIN ONLY) -->
+  <ng-container *ngIf="activeTab === 'admins' && isSuperAdmin">
+    <section class="panel">
+      <div class="panel-title-row">
+        <h2>Administrator Accounts</h2>
+        <button class="action-btn green" (click)="showCreateAdminModal = true">+ Create New Admin</button>
+      </div>
+
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Admin ID</th>
+              <th>Username</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let adm of adminsList">
+              <td class="mono">#{{ adm.id }}</td>
+              <td><strong>{{ adm.username }}</strong></td>
+              <td>{{ adm.phone_number || '--' }}</td>
+              <td>
+                <span class="role-badge" [class.superadmin]="adm.role === 'superadmin'" [class.admin]="adm.role === 'admin'">
+                  {{ adm.role | uppercase }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge completed">ACTIVE</span>
+              </td>
+              <td class="text-xs">{{ adm.created_at | date:'medium' }}</td>
+              <td>
+                <button *ngIf="adm.role !== 'superadmin'" class="sm-btn red" (click)="deleteAdmin(adm)">Remove Admin</button>
+                <span *ngIf="adm.role === 'superadmin'" class="text-muted text-xs">Superadmin</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CREATE ADMIN MODAL -->
+    <div *ngIf="showCreateAdminModal" class="modal-backdrop">
+      <div class="modal-card">
+        <button class="modal-close" (click)="showCreateAdminModal = false">✕</button>
+        <h3>Create New Admin Account</h3>
+
+        <div class="form-group margin-top">
+          <label>Username</label>
+          <input type="text" [(ngModel)]="newAdminUsername" placeholder="e.g. admin_john" class="styled-input" />
+        </div>
+
+        <div class="form-group margin-top">
+          <label>Phone Number (Optional)</label>
+          <input type="text" [(ngModel)]="newAdminPhone" placeholder="e.g. 0712345678" class="styled-input" />
+        </div>
+
+        <div class="form-group margin-top">
+          <label>Password (Min 6 chars)</label>
+          <input type="password" [(ngModel)]="newAdminPassword" placeholder="••••••••" class="styled-input" />
+        </div>
+
+        <button class="action-btn green margin-top full-width" (click)="createAdmin()">Confirm Create Admin</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- TAB: ACTIVE USERS & WITHDRAWAL WAGERS -->
+  <ng-container *ngIf="activeTab === 'active-users'">
+    <section class="panel withdrawal-rule-panel margin-bottom-lg">
+      <div class="panel-title-row">
+        <div>
+          <h2>Withdrawal Wager Rule</h2>
+          <p class="panel-desc">Every withdrawal stays pending for your review. You can complete it only after the player reaches this total wager amount. Set it to 0 to remove the wager limit.</p>
+        </div>
+        <div class="withdrawal-rule-controls">
+          <label for="withdrawalWagerRequirement">Minimum total wager (KES)</label>
+          <div class="withdrawal-rule-input-row">
+            <input
+              id="withdrawalWagerRequirement"
+              type="number"
+              min="0"
+              step="1"
+              class="styled-input"
+              [(ngModel)]="withdrawalWagerRequirement"
+              [disabled]="isSavingWithdrawalWagerRequirement"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="withdrawal-template-fields">
+        <div class="form-group">
+          <label for="withdrawalInitiationTitle">Popup title shown when a player requests a withdrawal</label>
+          <input
+            id="withdrawalInitiationTitle"
+            type="text"
+            maxlength="100"
+            class="styled-input"
+            [(ngModel)]="withdrawalInitiationTitle"
+            [disabled]="isSavingWithdrawalWagerRequirement"
+          />
+        </div>
+        <div class="form-group">
+          <label for="withdrawalInitiationMessage">Popup message template</label>
+          <textarea
+            id="withdrawalInitiationMessage"
+            rows="4"
+            maxlength="2000"
+            class="styled-textarea"
+            [(ngModel)]="withdrawalInitiationMessage"
+            [disabled]="isSavingWithdrawalWagerRequirement"
+          ></textarea>
+          <p class="template-help">This exact title and message are shown automatically to every player as soon as they press Withdraw.</p>
+        </div>
+        <button class="action-btn gold" (click)="saveWithdrawalWagerRequirement()" [disabled]="isSavingWithdrawalWagerRequirement">
+          {{ isSavingWithdrawalWagerRequirement ? 'SAVING...' : 'SAVE WITHDRAWAL SETTINGS' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 1: PENDING WITHDRAWALS REVIEW -->
+    <section class="panel glow-gold margin-bottom-lg">
+      <div class="panel-title-row">
+        <h2>⏳ Pending Withdrawals & Wager Verification</h2>
+        <button class="action-btn outline-sm" (click)="fetchActiveUsers()">🔄 Refresh Active List</button>
+      </div>
+
+      <p class="panel-desc">
+        Review withdrawal requests against the current minimum total wager rule. The player already received the saved daily popup automatically when they pressed Withdraw.
+      </p>
+
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Wd ID</th>
+              <th>Player</th>
+              <th>Requested Amount</th>
+              <th>Wallet Balance</th>
+              <th>Total Deposits</th>
+              <th>Total Wager</th>
+              <th>Status</th>
+              <th>Online</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let wd of pendingWithdrawalsList">
+              <td class="mono">#{{ wd.id }}</td>
+              <td>
+                <strong>{{ wd.username }}</strong>
+                <div class="text-xs text-muted">{{ wd.phone_number || '--' }}</div>
+              </td>
+              <td><strong class="text-gold font-bold">KES {{ wd.amount | number:'1.2-2' }}</strong></td>
+              <td>KES {{ wd.user_current_balance | number:'1.2-2' }}</td>
+              <td>
+                <span [class.text-green]="wd.user_total_deposits >= 2500" [class.text-red]="wd.user_total_deposits < 2500" class="font-bold">
+                  KES {{ wd.user_total_deposits | number:'1.2-2' }}
+                </span>
+                <div class="text-xs text-muted" *ngIf="wd.user_total_deposits < 2500">⚠️ Needs KES 2,500 min</div>
+              </td>
+              <td>
+                <span [class.text-green]="wd.user_total_wagers >= withdrawalWagerRequirement" [class.text-red]="wd.user_total_wagers < withdrawalWagerRequirement" class="font-bold">
+                  KES {{ wd.user_total_wagers | number:'1.2-2' }}
+                </span>
+                <div class="text-xs text-muted" *ngIf="wd.user_total_wagers < withdrawalWagerRequirement">Needs KES {{ withdrawalWagerRequirement | number:'1.2-2' }} min</div>
+              </td>
+              <td><span class="status-badge pending">PENDING</span></td>
+              <td>
+                <span class="online-indicator" [class.online]="wd.is_online">
+                  {{ wd.is_online ? '🟢 Online' : '⚪ Offline' }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group-row">
+                  <button class="sm-btn green" (click)="openWithdrawalModal(wd, 'complete')">Complete</button>
+                  <button class="sm-btn red" (click)="openWithdrawalModal(wd, 'reject')">Reject</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="pendingWithdrawalsList.length === 0 && !isLoadingActiveUsers">
+              <td colspan="9" class="text-center text-muted padding-lg">
+                ✨ No pending withdrawal requests right now.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 2: ACTIVE & ONLINE USERS LIST -->
+    <section class="panel">
+      <div class="panel-title-row">
+        <h2>👥 Active Players & Wager Status</h2>
+        <span class="text-xs text-muted">Showing active player balances & wager stats</span>
+      </div>
+
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Username</th>
+              <th>Phone Number</th>
+              <th>Wallet Balance</th>
+              <th>Total Deposits</th>
+              <th>Total Wager</th>
+              <th>Status</th>
+              <th>Player Notification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let usr of activeUsersList">
+              <td class="mono">#{{ usr.id }}</td>
+              <td><strong>{{ usr.username }}</strong></td>
+              <td>{{ usr.phone_number || '--' }}</td>
+              <td><strong class="text-green">KES {{ usr.balance | number:'1.2-2' }}</strong></td>
+              <td>KES {{ usr.total_deposits | number:'1.2-2' }}</td>
+              <td>KES {{ usr.total_wagers | number:'1.2-2' }}</td>
+              <td>
+                <span class="online-indicator" [class.online]="usr.is_online">
+                  {{ usr.is_online ? '🟢 Online' : '⚪ Offline' }}
+                </span>
+              </td>
+              <td><span class="text-muted text-xs">Automatic on withdrawal</span></td>
+            </tr>
+            <tr *ngIf="activeUsersList.length === 0 && !isLoadingActiveUsers">
+              <td colspan="8" class="text-center text-muted padding-lg">
+                No active users found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CUSTOM NOTIFICATION & WITHDRAWAL PROCESS MODAL -->
+    <div *ngIf="showNotifyModal" class="modal-backdrop">
+      <div class="modal-card width-lg">
+        <button class="modal-close" (click)="closeNotifyModal()">✕</button>
+        
+        <h3>
+          <span *ngIf="notifActionType === 'complete'">✅ Complete Withdrawal & Send Pop-up</span>
+          <span *ngIf="notifActionType === 'reject'">⚠️ Reject Withdrawal & Send Wager Notice</span>
+          <span *ngIf="notifActionType === 'custom'">📲 Send Direct Pop-up Notification to Player</span>
+        </h3>
+
+        <div class="user-summary-box margin-top" *ngIf="selectedUserForNotif">
+          <div class="summary-line">
+            <span>Target Player: <strong>{{ selectedUserForNotif.username }}</strong></span>
+            <span>Phone: <strong>{{ selectedUserForNotif.phone_number || '--' }}</strong></span>
+          </div>
+          <div class="summary-line margin-top-xs" *ngIf="selectedWithdrawalId">
+            <span>Requested Amount: <strong class="text-gold">KES {{ $any(selectedUserForNotif).amount | number:'1.2-2' }}</strong></span>
+            <span>Total Deposits: <strong>KES {{ $any(selectedUserForNotif).user_total_deposits | number:'1.2-2' }}</strong></span>
+            <span>Total Wager: <strong>KES {{ $any(selectedUserForNotif).user_total_wagers | number:'1.2-2' }}</strong></span>
+          </div>
+        </div>
+
+        <!-- NOTIFICATION TITLE INPUT -->
+        <div class="form-group margin-top">
+          <label>Notification Header Title</label>
+          <input type="text" [(ngModel)]="notifTitle" class="styled-input" placeholder="Notification Header Title" />
+        </div>
+
+        <!-- CUSTOM MESSAGE TEXTAREA -->
+        <div class="form-group margin-top">
+          <label>Custom Notification Message (Pop-up on Player's Device)</label>
+          <textarea 
+            [(ngModel)]="notifMessage" 
+            rows="5" 
+            class="styled-textarea" 
+            placeholder="Type your message here..."
+          ></textarea>
+        </div>
+
+        <div class="modal-actions-row margin-top-lg">
+          <button class="action-btn outline" (click)="closeNotifyModal()" [disabled]="isSendingNotif">Cancel</button>
+          <button 
+            class="action-btn" 
+            [class.green]="notifActionType === 'complete'" 
+            [class.red]="notifActionType === 'reject'"
+            [class.blue]="notifActionType === 'custom'"
+            (click)="submitNotificationAction()" 
+            [disabled]="isSendingNotif"
+          >
+            {{ isSendingNotif ? 'SENDING...' : (notifActionType === 'complete' ? 'Approve & Send Notification' : (notifActionType === 'reject' ? 'Reject & Send Wager Notice' : 'Send Phone Pop-Up')) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- TAB 5: AUDIT LOGS -->
+  <ng-container *ngIf="activeTab === 'logs'">
+    <section class="panel">
+      <h2>Admin Audit Trail</h2>
+      <div class="table-responsive margin-top">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Log ID</th>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Details</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of adminLogs">
+              <td class="mono">#{{ l.id }}</td>
+              <td><strong>{{ l.admin_username }}</strong></td>
+              <td><span class="action-tag">{{ l.action }}</span></td>
+              <td>{{ l.details }}</td>
+              <td class="text-xs">{{ l.created_at | date:'medium' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</main>

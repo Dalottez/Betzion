@@ -1,0 +1,929 @@
+<div class="aviator-root dark-theme" [class.chat-open]="chatOpen()">
+
+  <!-- GAME LOADING SPLASH SCREEN -->
+  <div class="game-loading-splash" *ngIf="gameLoading()">
+    <div class="splash-inner">
+      <p class="splash-powered-label">POWERED BY</p>
+      <div class="splash-logo-row">
+        <div class="splash-logo-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="white" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+            <circle cx="24" cy="24" r="14" stroke="white" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.4"/>
+            <circle cx="24" cy="24" r="6" fill="white" opacity="0.8"/>
+          </svg>
+        </div>
+        <span class="splash-logo-name">SPRIBE</span>
+      </div>
+      <p class="splash-logo-tagline">INSIGHTFUL ENTERTAINMENT</p>
+      <div class="splash-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <button class="go-back-btn" (click)="goBack()" title="Back to Dashboard">
+        ‹ Go Back
+      </button>
+      <div class="brand">
+        <span class="brand-title">Aviator</span>
+        <span class="provably-fair-tag" (click)="openHistoryModal()" title="Provably Fair Game Engine">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          Provably Fair
+        </span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <div class="balance-badge" (click)="openWalletPage()">
+        <span class="balance-label">WALLET</span>
+        <span class="balance-amount">{{ userBalance() | number:'1.2-2' }} KES</span>
+      </div>
+
+      <div class="wallet-actions">
+        <button class="wallet-route-btn" (click)="openDepositFromProfile()">Deposit</button>
+      </div>
+
+      <!-- PROFILE DROPDOWN TRIGGER -->
+      <div class="profile-dropdown-wrap" id="profileDropdownWrap">
+        <button class="profile-btn"
+                (click)="toggleProfileDropdown()"
+                title="Open menu"
+                [attr.aria-expanded]="showProfileDropdown()">
+          <span class="hamburger-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="sr-only">Open menu</span>
+        </button>
+
+        <!-- DROPDOWN MENU -->
+        <div class="profile-dropdown-menu" *ngIf="showProfileDropdown()">
+          <div class="profile-dropdown-header">
+            <span class="pdh-avatar">{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'P' }}</span>
+            <div class="pdh-info">
+              <span class="pdh-name">{{ currentUser()?.username || 'Player' }}</span>
+              <span class="pdh-balance">{{ userBalance() | number:'1.2-2' }} KES</span>
+            </div>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+          <button *ngIf="currentUser()?.role === 'admin' || currentUser()?.role === 'superadmin'" class="pdm-item admin-item" (click)="navigateToAdmin()">
+            <span class="pdm-icon">⚡</span> {{ currentUser()?.role === 'superadmin' ? 'Superadmin Dashboard' : 'Admin Dashboard' }}
+          </button>
+          <button class="pdm-item" (click)="openDepositFromProfile()">
+            <span class="pdm-icon">💳</span> Deposit
+          </button>
+          <button class="pdm-item" (click)="openWithdrawFromProfile()">
+            <span class="pdm-icon">💸</span> Withdraw
+          </button>
+          <button class="pdm-item" (click)="openHistoryModal()">
+            <span class="pdm-icon">📜</span> Bet History
+          </button>
+          <button class="pdm-item bonus-claim-item"
+                  [class.claimed]="currentUser()?.bonus_claimed"
+                  [disabled]="currentUser()?.bonus_claimed || isClaimingBonus()"
+                  (click)="claimWelcomeBonus()">
+            <span class="pdm-icon">🎁</span>
+            <span>{{ currentUser()?.bonus_claimed ? '1,999 KES bonus claimed' : (isClaimingBonus() ? 'Claiming bonus...' : 'Claim 1,999 KES bonus') }}</span>
+          </button>
+          <button class="pdm-item sound-item" [class.muted]="!soundEnabled()" (click)="toggleSound()">
+            <span class="pdm-icon">{{ soundEnabled() ? '🔊' : '🔇' }}</span>
+            <span>Sound {{ soundEnabled() ? 'on' : 'off' }}</span>
+          </button>
+          <div class="profile-dropdown-divider"></div>
+          <button class="pdm-item logout-item" (click)="logout()">
+            <span class="pdm-icon">🚪</span> Logout
+          </button>
+        </div>
+      </div>
+
+      <button class="chat-toggle-btn" type="button" (click)="toggleChat()" [class.active]="chatOpen()"
+              title="Open Betzion live chat" [attr.aria-expanded]="chatOpen()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 11.25a7.5 7.5 0 0 1-8 7.47A7.9 7.9 0 0 1 8.72 18L4.5 19.5 6 15.28A7.9 7.9 0 0 1 5.28 12 7.5 7.5 0 0 1 12.75 4.5 7.5 7.5 0 0 1 20 11.25Z" />
+        </svg>
+        <span class="sr-only">Open Betzion live chat</span>
+      </button>
+
+      <button class="nav-icon-btn" (click)="toggleFullscreen()" title="Toggle Fullscreen">
+        ⛶
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT (SIDEBAR + GAME VIEWPORT + CHAT DRAWER) -->
+  <div class="main-layout" [class.chat-open]="chatOpen()">
+    <!-- LEFT SIDEBAR: LIVE BETS FEED -->
+    <aside class="left-sidebar glass-card">
+      <div class="bets-tabs">
+        <button [class.active]="activeTab() === 'all'" (click)="activeTab.set('all')">All Bets</button>
+        <button [class.active]="activeTab() === 'my'" (click)="activeTab.set('my')">Previous</button>
+        <button [class.active]="activeTab() === 'top'" (click)="activeTab.set('top')">Top</button>
+      </div>
+
+      <div class="bets-header-info">
+        <div class="bets-header-text">
+          <span class="bets-title">
+            {{ activeTab() === 'all' ? 'ALL BETS' : (activeTab() === 'my' ? 'PREVIOUS' : 'TOP') }}
+          </span>
+          <span class="bets-count">{{ betsCount() }}</span>
+        </div>
+      </div>
+
+      <div class="bets-table-header">
+        <span class="col-player">Player</span>
+        <span class="col-bet text-right">Bet KES</span>
+        <span class="col-mult text-center">X</span>
+        <span class="col-win text-right">Win KES</span>
+      </div>
+
+      <div class="bets-list">
+        <div *ngFor="let item of displayBetsList()" 
+             class="bet-row" 
+             [class.cashed-out]="item.cashedOut" 
+             [class.my-bet]="item.isCurrentUser">
+          <span class="col-player player-name">
+            <span class="user-avatar-wrap">
+              <img *ngIf="item.avatarIcon.includes('.svg') || item.avatarIcon.includes('.png') || item.avatarIcon.includes('/')" 
+                   [src]="item.avatarIcon" 
+                   class="user-avatar-img" 
+                   [alt]="item.player" 
+                   loading="lazy" />
+              <span *ngIf="!item.avatarIcon.includes('.svg') && !item.avatarIcon.includes('.png') && !item.avatarIcon.includes('/')" 
+                    class="user-avatar-fallback">{{ item.avatarIcon }}</span>
+            </span>
+            <span class="name-text">{{ item.player }}</span>
+          </span>
+          <span class="col-bet text-right">{{ item.bet | number:'1.2-2' }}</span>
+          <span class="col-mult text-center">
+            <span *ngIf="item.cashedOut && item.multiplier" 
+                  class="mult-badge"
+                  [class.mult-blue]="item.multiplier < 2.0"
+                  [class.mult-purple]="item.multiplier >= 2.0">
+              {{ item.multiplier | number:'1.2-2' }}x
+            </span>
+          </span>
+          <span class="col-win text-right win-amount">
+            <span *ngIf="item.cashedOut && item.win > 0">{{ item.win | number:'1.2-2' }}</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button (click)="openHistoryModal()" title="Open provably fair game history">
+          <span aria-hidden="true">&#9670;</span> Provably Fair Game
+        </button>
+        <span>Powered by <strong>SPRIBE</strong></span>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN GAME AREA -->
+    <main class="game-area">
+      <!-- LIVE TOURNAMENT BANNER -->
+      <div class="live-banner">
+        <span class="live-dot">🟢 LIVE</span>
+        <span class="banner-text">Mfalme Wa Anga KES 400,000 Daily Crown</span>
+        <span class="connection-status" [class.online]="isConnected()">
+          {{ isConnected() ? 'Socket Connected' : 'Reconnecting...' }}
+        </span>
+      </div>
+
+      <!-- ROOM SWITCHER & MULTIPLIER HISTORY BAR -->
+      <div class="history-bar-container glass-card">
+        <div class="room-selector">
+          <button [class.active]="selectedRoom() === 1" (click)="openChangeRoomModal(1)">
+            <span class="room-close" (click)="$event.stopPropagation(); openChangeRoomModal(1)" aria-hidden="true">×</span> Room #1
+          </button>
+          <button [class.active]="selectedRoom() === 2" (click)="openChangeRoomModal(2)">
+            <span class="room-close" (click)="$event.stopPropagation(); openChangeRoomModal(2)" aria-hidden="true">×</span> Room #2
+          </button>
+          <button [class.active]="selectedRoom() === 3" (click)="openChangeRoomModal(3)">
+            <span class="room-close" (click)="$event.stopPropagation(); openChangeRoomModal(3)" aria-hidden="true">×</span> Room #3
+          </button>
+        </div>
+
+        <div class="multiplier-ribbon">
+          <div *ngFor="let mult of history()" 
+               class="mult-pill" 
+               [class.low]="mult < 2.0" 
+               [class.mid]="mult >= 2.0 && mult < 10.0" 
+               [class.high]="mult >= 10.0">
+            {{ mult | number:'1.2-2' }}x
+          </div>
+        </div>
+
+        <button class="more-ribbon-btn" (click)="openHistoryModal()" title="View full history">
+          📜 History
+        </button>
+      </div>
+
+      <!-- CANVAS FLIGHT VIEWPORT -->
+      <div class="canvas-viewport glass-card" #canvasContainer>
+        <canvas #flightCanvas></canvas>
+
+        <!-- OVERLAY MULTIPLIER & STAGE TEXT -->
+        <div class="canvas-overlay">
+          <!-- 1. WAITING PRE-ROUND STAGE WITH SPONSOR / PARTNERS GRAPHIC -->
+          <div *ngIf="gameState() === 'WAITING'" class="stage-overlay waiting">
+            <div class="partner-branding-box">
+              <div class="ufc-partner-badge">
+                <span class="ufc-title">UFC</span>
+                <span class="divider">|</span>
+                <span class="aviator-title">Aviator</span>
+              </div>
+              <div class="partner-subtitle">OFFICIAL PARTNERS</div>
+              <div class="red-line-countdown-wrap">
+                <div class="red-line-countdown" [style.width.%]="countdownProgress()"></div>
+              </div>
+              <div class="spribe-cert-badge">
+                <span class="cert-title">🎮 SPRIBE</span>
+                <span class="cert-status">Official Game ✔</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. RUNNING FLIGHT STAGE -->
+          <div *ngIf="gameState() === 'RUNNING'" class="stage-overlay running">
+            <h1 class="live-multiplier-display"
+                [class.mult-blue]="animatedMultiplier() < 2.0"
+                [class.mult-purple]="animatedMultiplier() >= 2.0 && animatedMultiplier() < 10.0"
+                [class.mult-pink]="animatedMultiplier() >= 10.0">
+              {{ animatedMultiplier() | number:'1.2-2' }}x
+            </h1>
+          </div>
+
+          <!-- 3. CRASHED ("FLEW AWAY!") STAGE -->
+          <div *ngIf="gameState() === 'CRASHED'" class="stage-overlay crashed">
+            <h2 class="flew-away-text">FLEW AWAY!</h2>
+            <h1 class="crashed-multiplier-display">{{ finalCrashMultiplier() | number:'1.2-2' }}x</h1>
+          </div>
+
+          <!-- One notice per bet slot, stacked only when both panels cash out. -->
+          <div *ngIf="cashoutNotifications().length" class="cashout-notification-stack" aria-live="polite">
+          <article *ngFor="let notice of cashoutNotifications()" class="cashout-notification-card">
+              <div class="cashout-notice-copy"><span>You have cashed out!</span><strong>{{ notice.multiplier | number:'1.2-2' }}x</strong></div>
+              <div class="cashout-win"><span>Win KES</span><strong>{{ notice.payout | number:'1.2-2' }}</strong></div>
+              <button type="button" class="cashout-dismiss" (click)="dismissCashoutNotification(notice.id)" aria-label="Dismiss cash out notification">×</button>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- DUAL BET CONTROL PANELS -->
+      <div class="dual-bet-panels">
+        <!-- PANEL 1 -->
+        <div class="bet-panel-box glass-card" [class.panel-active]="panel1().hasActiveBet" [class.auto-mode]="panel1().mode === 'auto'">
+          <div class="panel-header-row">
+            <div class="panel-subtabs" [class.auto-mode]="panel1().mode === 'auto'">
+              <button type="button" [class.active]="panel1().mode === 'bet'" (click)="setPanelMode(1, 'bet')">Bet</button>
+              <button type="button" [class.active]="panel1().mode === 'auto'" (click)="setPanelMode(1, 'auto')">Auto</button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="controls-col">
+              <div class="amount-stepper">
+                <button type="button" class="step-btn" (click)="adjustPanelAmount(1, -10)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending" aria-label="Decrease amount">-</button>
+                <div class="amount-display-box">
+                  <input type="text"
+                         inputmode="decimal"
+                         class="amount-input-field" 
+                         [value]="panel1().amount | number:'1.2-2'" 
+                         (input)="onAmountInput(1, $event)"
+                         (blur)="onAmountBlur(1, $event)"
+                         [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending" />
+                </div>
+                <button type="button" class="step-btn" (click)="adjustPanelAmount(1, 10)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending" aria-label="Increase amount">+</button>
+              </div>
+
+              <div class="preset-buttons">
+                <button type="button" [class.active]="panel1().selectedPreset === 100" (click)="selectPresetAmount(1, 100)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending">100</button>
+                <button type="button" [class.active]="panel1().selectedPreset === 250" (click)="selectPresetAmount(1, 250)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending">250</button>
+                <button type="button" [class.active]="panel1().selectedPreset === 1000" (click)="selectPresetAmount(1, 1000)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending">1,000</button>
+                <button type="button" [class.active]="panel1().selectedPreset === 25000" (click)="selectPresetAmount(1, 25000)" [disabled]="panel1().hasActiveBet || panel1().queuedAmount > 0 || panel1().isPending">25,000</button>
+              </div>
+            </div>
+
+            <div class="action-col">
+              <!-- PRE-ROUND: PLACE BET -->
+              <button *ngIf="gameState() === 'WAITING' && !panel1().hasActiveBet && !panel1().queuedAmount" 
+                      class="big-bet-btn green" 
+                      [disabled]="panel1().isPending" 
+                      (click)="placeBet(1)">
+                <span class="btn-title">{{ panel1().isPending ? 'Placing...' : 'Bet' }}</span>
+                <span class="btn-sub">{{ panel1().amount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- PRE-ROUND: BET PLACED WAITING FOR FLIGHT -->
+              <button *ngIf="gameState() === 'WAITING' && panel1().hasActiveBet" 
+                      class="big-bet-btn orange" disabled>
+                <span class="btn-title">Waiting...</span>
+                <span class="btn-sub">{{ panel1().placedAmount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- BET QUEUED DURING A FLIGHT -->
+              <button *ngIf="panel1().queuedAmount > 0"
+                      class="big-bet-btn queued"
+                      (click)="cancelQueuedBet(1)">
+                <span class="btn-title">Cancel</span>
+                <span class="btn-sub">Waiting for next round</span>
+              </button>
+
+              <!-- RUNNING: CASH OUT NOW -->
+              <button *ngIf="gameState() === 'RUNNING' && panel1().hasActiveBet && !panel1().hasCashedOut" 
+                      class="big-bet-btn orange pulse" 
+                      [disabled]="panel1().isPending"
+                      (click)="cashOut(1)">
+                <span class="btn-title">{{ panel1().isPending ? 'Cashing...' : 'Cash Out' }}</span>
+                <span class="btn-sub">{{ potentialPayout1() | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- RUNNING / CRASHED: cash-out is confirmed in the notification; one next-round action remains. -->
+              <button *ngIf="(gameState() === 'RUNNING' || gameState() === 'CRASHED') && panel1().hasCashedOut && !panel1().queuedAmount"
+                      class="big-bet-btn green"
+                      (click)="queueBet(1)">
+                <span class="btn-title">Bet</span>
+                <span class="btn-sub">{{ panel1().amount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- RUNNING / CRASHED: NO ACTIVE BET -->
+              <button *ngIf="(gameState() === 'RUNNING' || gameState() === 'CRASHED') && !panel1().hasActiveBet && !panel1().hasCashedOut && !panel1().queuedAmount"
+                      class="big-bet-btn green"
+                      (click)="queueBet(1)">
+                <span class="btn-title">Bet</span>
+                <span class="btn-sub">{{ panel1().amount | number:'1.2-2' }} KES</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BOTTOM AUTO CONTROLS ROW -->
+          <div class="panel-footer-row" *ngIf="panel1().mode === 'auto'">
+            <div class="auto-opt-item">
+              <span class="auto-opt-label">Auto bet</span>
+              <button type="button" 
+                      class="toggle-switch-btn" 
+                      [class.active]="panel1().autoBetEnabled" 
+                      (click)="toggleAutoBet(1)"
+                      aria-label="Toggle Auto bet">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="auto-opt-item auto-cashout-wrap">
+              <span class="auto-opt-label">Auto Cash Out</span>
+              <button type="button" 
+                      class="toggle-switch-btn" 
+                      [class.active]="panel1().autoCashoutEnabled" 
+                      (click)="toggleAutoCashout(1)"
+                      aria-label="Toggle Auto Cash Out">
+                <span class="toggle-knob"></span>
+              </button>
+              <div class="auto-cashout-pill" [class.active]="panel1().autoCashoutEnabled">
+                <input type="number" 
+                       [ngModel]="panel1().autoTarget" 
+                       (ngModelChange)="setAutoCashout(1, $event)" 
+                       step="0.01" 
+                       min="1.01" 
+                       class="auto-mult-input" />
+                <span class="auto-mult-x" (click)="resetAutoCashout(1)">✕</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 2 -->
+        <div class="bet-panel-box glass-card" *ngIf="!panel2Collapsed()" [class.panel-active]="panel2().hasActiveBet" [class.auto-mode]="panel2().mode === 'auto'">
+          <div class="panel-header-row">
+            <div class="panel-subtabs" [class.auto-mode]="panel2().mode === 'auto'">
+              <button type="button" [class.active]="panel2().mode === 'bet'" (click)="setPanelMode(2, 'bet')">Bet</button>
+              <button type="button" [class.active]="panel2().mode === 'auto'" (click)="setPanelMode(2, 'auto')">Auto</button>
+            </div>
+            <button type="button" class="panel-collapse-btn" (click)="togglePanel2()" title="Minimize panel 2" aria-label="Minimize panel 2">
+              <span class="collapse-icon">−</span>
+            </button>
+          </div>
+
+          <div class="panel-body">
+            <div class="controls-col">
+              <div class="amount-stepper">
+                <button type="button" class="step-btn" (click)="adjustPanelAmount(2, -10)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending" aria-label="Decrease amount">-</button>
+                <div class="amount-display-box">
+                  <input type="text"
+                         inputmode="decimal"
+                         class="amount-input-field" 
+                         [value]="panel2().amount | number:'1.2-2'" 
+                         (input)="onAmountInput(2, $event)"
+                         (blur)="onAmountBlur(2, $event)"
+                         [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending" />
+                </div>
+                <button type="button" class="step-btn" (click)="adjustPanelAmount(2, 10)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending" aria-label="Increase amount">+</button>
+              </div>
+
+              <div class="preset-buttons">
+                <button type="button" [class.active]="panel2().selectedPreset === 100" (click)="selectPresetAmount(2, 100)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending">100</button>
+                <button type="button" [class.active]="panel2().selectedPreset === 250" (click)="selectPresetAmount(2, 250)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending">250</button>
+                <button type="button" [class.active]="panel2().selectedPreset === 1000" (click)="selectPresetAmount(2, 1000)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending">1,000</button>
+                <button type="button" [class.active]="panel2().selectedPreset === 25000" (click)="selectPresetAmount(2, 25000)" [disabled]="panel2().hasActiveBet || panel2().queuedAmount > 0 || panel2().isPending">25,000</button>
+              </div>
+            </div>
+
+            <div class="action-col">
+              <!-- PRE-ROUND: PLACE BET -->
+              <button *ngIf="gameState() === 'WAITING' && !panel2().hasActiveBet && !panel2().queuedAmount" 
+                      class="big-bet-btn green" 
+                      [disabled]="panel2().isPending" 
+                      (click)="placeBet(2)">
+                <span class="btn-title">{{ panel2().isPending ? 'Placing...' : 'Bet' }}</span>
+                <span class="btn-sub">{{ panel2().amount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- PRE-ROUND: BET PLACED WAITING FOR FLIGHT -->
+              <button *ngIf="gameState() === 'WAITING' && panel2().hasActiveBet" 
+                      class="big-bet-btn orange" disabled>
+                <span class="btn-title">Waiting...</span>
+                <span class="btn-sub">{{ panel2().placedAmount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- BET QUEUED DURING A FLIGHT -->
+              <button *ngIf="panel2().queuedAmount > 0"
+                      class="big-bet-btn queued"
+                      (click)="cancelQueuedBet(2)">
+                <span class="btn-title">Cancel</span>
+                <span class="btn-sub">Waiting for next round</span>
+              </button>
+
+              <!-- RUNNING: CASH OUT NOW -->
+              <button *ngIf="gameState() === 'RUNNING' && panel2().hasActiveBet && !panel2().hasCashedOut" 
+                      class="big-bet-btn orange pulse" 
+                      [disabled]="panel2().isPending"
+                      (click)="cashOut(2)">
+                <span class="btn-title">{{ panel2().isPending ? 'Cashing...' : 'Cash Out' }}</span>
+                <span class="btn-sub">{{ potentialPayout2() | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- RUNNING / CRASHED: cash-out is confirmed in the notification; one next-round action remains. -->
+              <button *ngIf="(gameState() === 'RUNNING' || gameState() === 'CRASHED') && panel2().hasCashedOut && !panel2().queuedAmount"
+                      class="big-bet-btn green"
+                      (click)="queueBet(2)">
+                <span class="btn-title">Bet</span>
+                <span class="btn-sub">{{ panel2().amount | number:'1.2-2' }} KES</span>
+              </button>
+
+              <!-- RUNNING / CRASHED: NO ACTIVE BET -->
+              <button *ngIf="(gameState() === 'RUNNING' || gameState() === 'CRASHED') && !panel2().hasActiveBet && !panel2().hasCashedOut && !panel2().queuedAmount"
+                      class="big-bet-btn green"
+                      (click)="queueBet(2)">
+                <span class="btn-title">Bet</span>
+                <span class="btn-sub">{{ panel2().amount | number:'1.2-2' }} KES</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BOTTOM AUTO CONTROLS ROW -->
+          <div class="panel-footer-row" *ngIf="panel2().mode === 'auto'">
+            <div class="auto-opt-item">
+              <span class="auto-opt-label">Auto bet</span>
+              <button type="button" 
+                      class="toggle-switch-btn" 
+                      [class.active]="panel2().autoBetEnabled" 
+                      (click)="toggleAutoBet(2)"
+                      aria-label="Toggle Auto bet">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="auto-opt-item auto-cashout-wrap">
+              <span class="auto-opt-label">Auto Cash Out</span>
+              <button type="button" 
+                      class="toggle-switch-btn" 
+                      [class.active]="panel2().autoCashoutEnabled" 
+                      (click)="toggleAutoCashout(2)"
+                      aria-label="Toggle Auto Cash Out">
+                <span class="toggle-knob"></span>
+              </button>
+              <div class="auto-cashout-pill" [class.active]="panel2().autoCashoutEnabled">
+                <input type="number" 
+                       [ngModel]="panel2().autoTarget" 
+                       (ngModelChange)="setAutoCashout(2, $event)" 
+                       step="0.01" 
+                       min="1.01" 
+                       class="auto-mult-input" />
+                <span class="auto-mult-x" (click)="resetAutoCashout(2)">✕</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RE-EXPAND PANEL 2 BUTTON IF COLLAPSED -->
+        <button *ngIf="panel2Collapsed()" type="button" class="expand-panel2-btn" (click)="togglePanel2()" title="Add second bet panel">
+          <span>+</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- RIGHT CHAT DRAWER (DOCKED AS 3RD COLUMN) -->
+    <aside class="chat-drawer" *ngIf="chatOpen()" aria-label="Betzion live chat">
+      <!-- Top bar on mobile mode matching image -->
+      <div class="chat-mobile-top-bar">
+        <button type="button" class="chat-mobile-back-btn" (click)="closeChat()">
+          <span class="back-arrow">‹</span> Go Back
+        </button>
+        <button type="button" class="chat-mobile-fullscreen-btn" (click)="toggleFullscreen()">
+          View Fullscreen <span class="fs-icon">⛶</span>
+        </button>
+      </div>
+
+      <!-- Floating chat card header container (matches screenshot) -->
+      <div class="chat-header-card">
+        <div class="chat-drawer-header">
+          <button type="button" class="chat-info-btn" title="Chat information" aria-label="Chat information">i</button>
+          <div class="chat-online-label">Online: <strong>{{ chatOnlineCount() | number:'1.0-0' }}</strong></div>
+          <button type="button" class="chat-close-btn" (click)="closeChat()" title="Close chat" aria-label="Close chat">✕</button>
+        </div>
+      </div>
+
+      <div class="chat-message-list"
+           #chatScroll
+           (scroll)="onChatScroll()"
+           (pointerdown)="onChatPointerDown()"
+           (pointerup)="onChatPointerUp()"
+           (pointercancel)="onChatPointerUp()"
+           (mouseleave)="onChatPointerUp()"
+           (touchstart)="onChatTouchStart()"
+           (touchend)="onChatTouchEnd()">
+        <ng-container *ngFor="let message of chatMessages(); trackBy: trackChatMessage">
+          <!-- Restriction notice message appearing in chat flow -->
+          <div *ngIf="message.isRestrictionNotice" class="chat-restriction-notice-row">
+            <span class="chat-restriction-text">Chat access is restricted for players with<br>balance below 1,000 KES</span>
+          </div>
+
+          <!-- Normal / User message -->
+          <div *ngIf="!message.isRestrictionNotice" class="chat-message-row" [class.own]="isOwnChatMessage(message)">
+            <img class="chat-avatar" [src]="message.avatar || 'assets/avatars/avatar-pilot.svg'" [alt]="message.username">
+            <div class="chat-message-bubble">
+              <div class="chat-message-meta">
+                <span class="chat-username" [style.color]="isOwnChatMessage(message) ? '#4ade80' : getChatUsernameColor(message.username)">{{ message.username }}</span>
+                <span class="chat-time">{{ formatChatTime(message.timestamp) }}</span>
+              </div>
+              <div class="chat-message-text">{{ message.text }}</div>
+            </div>
+            <button type="button" class="chat-like-btn" (click)="toggleLikeMessage(message)" aria-label="Like message">
+              <span class="heart-icon">♥</span>
+              <span class="likes-count" *ngIf="(message.likes || 0) > 0">{{ message.likes }}</span>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <button type="button"
+              class="chat-new-messages-pill"
+              (click)="onNewMessagesPillClick()"
+              *ngIf="showNewMessagesPill()"
+              aria-label="Scroll to latest messages">
+        <span>New messages</span>
+        <span class="pill-arrow" aria-hidden="true">▼</span>
+      </button>
+
+      <!-- Composer matching screenshot -->
+      <form class="chat-composer" (ngSubmit)="sendChatMessage()">
+        <input type="text" maxlength="220" autocomplete="off" placeholder="Your message..."
+               [ngModel]="chatDraft()" (ngModelChange)="chatDraft.set($event)" name="chatDraft"
+               [disabled]="!isConnected()" aria-label="Your message">
+        <div class="chat-composer-footer">
+          <button type="button" class="chat-emoji-btn" aria-label="Add emoji">☺</button>
+          <span class="chat-character-count">AA {{ 220 - chatDraft().length }}</span>
+          <button type="submit" class="chat-send-btn" [disabled]="!isConnected() || !chatDraft().trim()" title="Send message" aria-label="Send message">➤</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+
+  <div *ngIf="bonusNotif()" class="bonus-notification" [class.info]="bonusNotif()?.type === 'info'" role="alert">
+    <div class="bonus-notification-icon">{{ bonusNotif()?.type === 'success' ? '🎉' : '💡' }}</div>
+    <div class="bonus-notification-content">
+      <span class="bonus-notification-eyebrow">BETZION REWARDS</span>
+      <strong>{{ bonusNotif()?.title }}</strong>
+      <p>{{ bonusNotif()?.message }}</p>
+    </div>
+    <button class="bonus-notification-close" (click)="dismissBonusNotification()" aria-label="Dismiss notification">×</button>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div *ngIf="toastMessage()" class="toast-popup" [class.error]="isToastError()">
+    <span>{{ toastMessage() }}</span>
+    <button (click)="toastMessage.set(null)" class="toast-close">✕</button>
+  </div>
+
+  <!-- WALLET / DEPOSIT / WITHDRAWAL MODAL (EXACT SCREENSHOT MATCH) -->
+  <div *ngIf="showWalletModal()" class="modal-backdrop" (click)="showWalletModal.set(false)">
+    <div class="modal-card wallet-screenshot-card" (click)="$event.stopPropagation()">
+      
+      <!-- TOP CURRENT BALANCE CARD -->
+      <div class="wallet-balance-banner">
+        <div class="banner-title">Current Balance</div>
+        <div class="banner-subtitle">Available wallet amount</div>
+        <div class="banner-amount">KES {{ userBalance() | number:'1.0-2' }}</div>
+      </div>
+
+      <!-- TAB SWITCHER (DEPOSIT vs WITHDRAW) -->
+      <div class="wallet-segmented-tabs">
+        <button type="button" 
+                class="segmented-tab-btn" 
+                [class.active]="walletTab() === 'deposit'" 
+                (click)="setWalletTab('deposit')">
+          Deposit
+        </button>
+        <button type="button" 
+                class="segmented-tab-btn" 
+                [class.active]="walletTab() === 'withdraw'" 
+                (click)="setWalletTab('withdraw')">
+          Withdraw
+        </button>
+      </div>
+
+      <!-- MAIN DEPOSIT CARD -->
+      <div *ngIf="walletTab() === 'deposit'" class="wallet-form-container">
+        <h2 class="form-heading">Deposit</h2>
+        <p class="form-subheading">Send money into your account</p>
+
+        <!-- PRESET PILLS: +1,000 | +2,000 | +5,000 | +10,000 -->
+        <div class="preset-pills-grid">
+          <button type="button" class="preset-pill-btn" (click)="addDepositAmount(1000)">+1,000</button>
+          <button type="button" class="preset-pill-btn" (click)="addDepositAmount(2000)">+2,000</button>
+          <button type="button" class="preset-pill-btn" (click)="addDepositAmount(5000)">+5,000</button>
+          <button type="button" class="preset-pill-btn" (click)="addDepositAmount(10000)">+10,000</button>
+        </div>
+
+        <!-- PHONE NUMBER INPUT GROUP -->
+        <div class="form-group-field">
+          <label class="form-group-label">Phone Number</label>
+          <div class="phone-select-wrap">
+            <select class="phone-prefix-select">
+              <option value="+254">+254</option>
+            </select>
+            <input type="tel" 
+                   [ngModel]="mpesaPhone()" 
+                   (ngModelChange)="mpesaPhone.set($event)" 
+                   placeholder="722220165" 
+                   class="phone-text-input" />
+          </div>
+        </div>
+
+        <!-- AMOUNT INPUT GROUP -->
+        <div class="form-group-field">
+          <label class="form-group-label">Amount</label>
+          <input type="number" 
+                 [ngModel]="depositVal()" 
+                 (ngModelChange)="depositVal.set($event)" 
+                 placeholder="999" 
+                 class="amount-text-input" />
+          <div class="form-helper-text">Minimum KES 999.</div>
+        </div>
+
+        <!-- STATUS / STK MESSAGES IF ANY -->
+        <div *ngIf="mpesaStatusMsg()" class="mpesa-status-alert" [class.failed]="mpesaStatus() === 'failed'" [class.success]="mpesaStatus() === 'success'">
+          {{ mpesaStatusMsg() }}
+        </div>
+
+        <!-- BOTTOM ACTION BUTTONS: BACK & DEPOSIT -->
+        <div class="form-actions-row">
+          <button type="button" class="action-btn-back" (click)="showWalletModal.set(false)">BACK</button>
+          <button type="button" class="action-btn-green" [disabled]="mpesaStatus() === 'sending'" (click)="submitDeposit()">
+            {{ mpesaStatus() === 'sending' ? 'Sending...' : 'Deposit' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN WITHDRAWAL CARD -->
+      <div *ngIf="walletTab() === 'withdraw'" class="wallet-form-container">
+
+        <!-- ADMIN / WITHDRAWAL POP-UP NOTIFICATION BANNER -->
+        <div class="tab-withdrawal-notif-card"
+             [class.type-complete]="withdrawalNotif()?.type === 'completed'"
+             [class.type-rejected]="withdrawalNotif()?.type === 'rejected'"
+             [class.type-pending]="withdrawalNotif()?.type === 'pending'"
+             *ngIf="withdrawalNotif() !== null"
+             role="alert">
+          <div class="notif-accent-bar"></div>
+          <div class="notif-content-body">
+            <div class="notif-top-bar">
+              <div class="notif-brand-tag">
+                <span class="notif-icon-emoji">
+                  {{ withdrawalNotif()?.type === 'completed' ? '✅' : (withdrawalNotif()?.type === 'rejected' ? '⚠️' : '📋') }}
+                </span>
+                <span class="notif-brand-title">BETZION WITHDRAWAL</span>
+                <span class="notif-time-stamp">{{ withdrawalNotif()?.timestamp }}</span>
+              </div>
+              <button class="notif-close-btn" (click)="dismissWithdrawalNotification()" title="Close">✕</button>
+            </div>
+
+            <div class="notif-card-title">{{ withdrawalNotif()?.title }}</div>
+            <div class="notif-card-msg">{{ withdrawalNotif()?.message }}</div>
+          </div>
+        </div>
+
+        <h2 class="form-heading">Withdrawals</h2>
+        <p class="form-subheading">Withdraw from your wallet</p>
+
+        <!-- PRESET PILLS: +200 | +500 | +1,000 | +5,000 -->
+        <div class="preset-pills-grid">
+          <button type="button" class="preset-pill-btn" (click)="addWithdrawAmount(200)">+200</button>
+          <button type="button" class="preset-pill-btn" (click)="addWithdrawAmount(500)">+500</button>
+          <button type="button" class="preset-pill-btn" (click)="addWithdrawAmount(1000)">+1,000</button>
+          <button type="button" class="preset-pill-btn" (click)="addWithdrawAmount(5000)">+5,000</button>
+        </div>
+
+        <!-- PHONE NUMBER INPUT GROUP -->
+        <div class="form-group-field">
+          <label class="form-group-label">Phone Number</label>
+          <div class="phone-select-wrap">
+            <select class="phone-prefix-select">
+              <option value="+254">+254</option>
+            </select>
+            <input type="tel" 
+                   [ngModel]="mpesaPhone()" 
+                   (ngModelChange)="mpesaPhone.set($event)" 
+                   placeholder="722220165" 
+                   class="phone-text-input" />
+          </div>
+        </div>
+
+        <!-- AMOUNT INPUT GROUP -->
+        <div class="form-group-field">
+          <label class="form-group-label">Amount</label>
+          <input type="number" 
+                 [ngModel]="withdrawVal()" 
+                 (ngModelChange)="withdrawVal.set($event)" 
+                 placeholder="200" 
+                 class="amount-text-input" />
+          <div class="form-helper-text">Daily withdrawal limits: Minimum KES 200, Maximum KES 300,000.</div>
+        </div>
+
+        <!-- BOTTOM ACTION BUTTONS: BACK & WITHDRAW -->
+        <div class="form-actions-row">
+          <button type="button" class="action-btn-back" (click)="showWalletModal.set(false)">BACK</button>
+          <button type="button" class="action-btn-green" [disabled]="isSubmittingWithdrawal()" (click)="submitWithdraw()">
+            {{ isSubmittingWithdrawal() ? 'Submitting...' : 'Withdraw' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS HISTORY FULL TAB -->
+      <div *ngIf="walletTab() === 'transactions'" class="screenshot-tab-body">
+        <div class="mpesa-main-card">
+          <div class="tx-history-header">
+            <h3 class="mpesa-card-title">Transaction History</h3>
+            <button class="tx-refresh-btn" (click)="loadTransactionsHistory()">Refresh</button>
+          </div>
+
+          <div class="transaction-type-tabs">
+            <button type="button" [class.active]="transactionHistoryTab() === 'deposit'" (click)="transactionHistoryTab.set('deposit')">Deposits</button>
+            <button type="button" [class.active]="transactionHistoryTab() === 'withdrawal'" (click)="transactionHistoryTab.set('withdrawal')">Withdrawals</button>
+          </div>
+
+          <div *ngIf="isLoadingTransactions" class="tx-loading">Loading transactions...</div>
+          <div *ngIf="!isLoadingTransactions && filteredTransactionHistory.length === 0" class="tx-empty">
+            No {{ transactionHistoryTab() === 'deposit' ? 'deposit' : 'withdrawal' }} transactions found.
+          </div>
+
+          <div *ngIf="!isLoadingTransactions && filteredTransactionHistory.length > 0" class="history-cards-list">
+            <div *ngFor="let tx of filteredTransactionHistory" class="history-item-card">
+              <div class="tx-info-col">
+                <span [class.tx-amount-green]="tx.type === 'deposit'" [class.tx-amount-orange]="tx.type === 'withdrawal'">
+                  {{ tx.type === 'deposit' ? '+ ' : '- ' }}{{ tx.amount | number:'1.2-2' }} KES
+                </span>
+                <span class="tx-date-sub">{{ tx.created_at | date:'dd/MM/yyyy, HH:mm:ss' }}</span>
+                <span class="tx-ref-code" *ngIf="tx.reference">Ref: {{ tx.reference }}</span>
+              </div>
+              <span class="tx-status-tag" [class.failed]="tx.status === 'failed'" [class.completed]="tx.status === 'completed'" [class.pending]="tx.status === 'pending'">
+                {{ tx.status === 'completed' ? 'Completed' : (tx.status === 'failed' ? 'Failed' : 'Pending') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MY BET HISTORY MODAL (Exact match to Spribe Aviator screenshot) -->
+  <div *ngIf="showHistoryModal()" class="modal-backdrop bet-history-backdrop" (click)="showHistoryModal.set(false)">
+    <div class="modal-card bet-history-card" (click)="$event.stopPropagation()">
+      <div class="bet-history-header">
+        <h2 class="bet-history-title">MY BET HISTORY</h2>
+        <button type="button" class="bet-history-close-btn" (click)="showHistoryModal.set(false)" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="bet-history-table-header">
+        <span class="bth-col bth-date">Date</span>
+        <span class="bth-col bth-bet">Bet KES</span>
+        <span class="bth-col bth-x">X</span>
+        <span class="bth-col bth-cashout">Cash out KES</span>
+        <span class="bth-col bth-icons"></span>
+      </div>
+
+      <div class="bet-history-list">
+        <div *ngFor="let item of userBetHistoryList() | slice:0:betHistoryLimit()" 
+             class="bet-history-row" 
+             [class.won]="item.cashedOut">
+          <div class="btr-date">
+            <span class="btr-time">{{ item.time }}</span>
+            <span class="btr-day">{{ item.date }}</span>
+          </div>
+
+          <div class="btr-bet">
+            {{ item.bet | number:'1.2-2' }}
+          </div>
+
+          <div class="btr-multiplier">
+            <span class="btr-mult-pill"
+                  [class.low]="item.multiplier < 2.0"
+                  [class.mid]="item.multiplier >= 2.0 && item.multiplier < 10.0"
+                  [class.high]="item.multiplier >= 10.0">
+              {{ item.multiplier | number:'1.2-2' }}x
+            </span>
+          </div>
+
+          <div class="btr-cashout">
+            <span *ngIf="item.cashedOut && item.win > 0" class="btr-win-amount">
+              {{ item.win | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="btr-actions">
+            <button type="button" class="btr-icon-btn btr-shield-btn" title="Provably Fair Verified" aria-label="Provably Fair">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </button>
+            <button type="button" class="btr-icon-btn btr-chat-btn" (click)="shareBetToChat(item)" title="Share to Chat" aria-label="Share">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bet-history-footer">
+        <button type="button" class="btn-load-more-history" (click)="loadMoreHistory()">
+          Load more
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE ROOM MODAL (Betzion Style) -->
+  <div *ngIf="showChangeRoomModal()" class="modal-backdrop change-room-backdrop" (click)="closeChangeRoomModal()">
+    <div class="modal-card change-room-card" (click)="$event.stopPropagation()">
+      <div class="change-room-header">
+        <h3 class="change-room-title">CHANGE ROOM</h3>
+        <button type="button" class="change-room-close-btn" (click)="closeChangeRoomModal()" title="Close">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div class="change-room-divider"></div>
+      <p class="change-room-desc">Switching rooms will load that room's current game. Do you wish to continue?</p>
+
+      <div class="change-room-options">
+        <div class="room-option-item" 
+             [class.selected]="pendingRoomSelection() === 1" 
+             (click)="pendingRoomSelection.set(1)">
+          <span class="room-radio-circle" [class.checked]="pendingRoomSelection() === 1">
+            <span *ngIf="pendingRoomSelection() === 1" class="room-radio-dot"></span>
+          </span>
+          <span class="room-option-label">Room #1</span>
+        </div>
+
+        <div class="room-option-item" 
+             [class.selected]="pendingRoomSelection() === 2" 
+             (click)="pendingRoomSelection.set(2)">
+          <span class="room-radio-circle" [class.checked]="pendingRoomSelection() === 2">
+            <span *ngIf="pendingRoomSelection() === 2" class="room-radio-dot"></span>
+          </span>
+          <span class="room-option-label">Room #2</span>
+        </div>
+
+        <div class="room-option-item" 
+             [class.selected]="pendingRoomSelection() === 3" 
+             (click)="pendingRoomSelection.set(3)">
+          <span class="room-radio-circle" [class.checked]="pendingRoomSelection() === 3">
+            <span *ngIf="pendingRoomSelection() === 3" class="room-radio-dot"></span>
+          </span>
+          <span class="room-option-label">Room #3</span>
+        </div>
+      </div>
+
+      <div class="change-room-actions">
+        <button type="button" class="btn-confirm-room-change" (click)="confirmRoomChange()">
+          CHANGE
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

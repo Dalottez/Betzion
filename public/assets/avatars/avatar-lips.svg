@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg-face" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffedd5"/>
+      <stop offset="70%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#fdba74"/>
+    </radialGradient>
+    <linearGradient id="lip-top" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="60%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+    <linearGradient id="lip-bottom" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#881337"/>
+      <stop offset="40%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg-face)"/>
+  <!-- Nose tip / philtrum -->
+  <path d="M48,15 C48,26 44,28 44,30 C46,32 54,32 56,30 C56,28 52,26 52,15 Z" fill="#fb923c" opacity="0.4"/>
+  <!-- Upper Lip -->
+  <path d="M22,50 C32,45 42,40 50,45 C58,40 68,45 78,50 C70,55 58,54 50,56 C42,54 30,55 22,50 Z" fill="url(#lip-top)"/>
+  <!-- Mouth opening -->
+  <path d="M28,52 C38,55 46,57 50,57 C54,57 62,55 72,52 C64,60 56,62 50,62 C44,62 36,60 28,52 Z" fill="#4c0519"/>
+  <!-- White Teeth peek -->
+  <path d="M38,54 C44,55 50,55 62,54 C60,57 56,58 50,58 C44,58 40,57 38,54 Z" fill="#ffffff"/>
+  <!-- Lower Lip -->
+  <path d="M22,50 C32,66 42,75 50,75 C58,75 68,66 78,50 C70,62 60,65 50,65 C40,65 30,62 22,50 Z" fill="url(#lip-bottom)"/>
+  <!-- Lip Gloss Highlights -->
+  <ellipse cx="44" cy="68" rx="6" ry="2.5" fill="#ffffff" opacity="0.75"/>
+  <ellipse cx="56" cy="68" rx="4" ry="2" fill="#ffffff" opacity="0.6"/>
+  <ellipse cx="45" cy="46" rx="3" ry="1.2" fill="#ffffff" opacity="0.65"/>
+  <ellipse cx="55" cy="46" rx="3" ry="1.2" fill="#ffffff" opacity="0.65"/>
+</svg>

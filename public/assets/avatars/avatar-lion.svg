@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg-lion" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#1c0701"/>
+    </radialGradient>
+    <linearGradient id="mane-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="50%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="lion-face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg-lion)"/>
+  <!-- Mane Silhouette -->
+  <path d="M50,12 C72,12 88,25 88,50 C88,75 72,88 50,88 C28,88 12,75 12,50 C12,25 28,12 50,12 Z" fill="url(#mane-grad)"/>
+  <!-- Mane spikes / tufts -->
+  <polygon points="50,6 44,14 56,14" fill="#b45309"/>
+  <polygon points="72,16 68,26 78,24" fill="#92400e"/>
+  <polygon points="86,32 78,38 88,44" fill="#78350f"/>
+  <polygon points="28,16 32,26 22,24" fill="#92400e"/>
+  <polygon points="14,32 22,38 12,44" fill="#78350f"/>
+  <!-- Ears -->
+  <circle cx="30" cy="30" r="8" fill="#d97706"/>
+  <circle cx="30" cy="30" r="5" fill="#fef08a"/>
+  <circle cx="70" cy="30" r="8" fill="#d97706"/>
+  <circle cx="70" cy="30" r="5" fill="#fef08a"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="54" rx="20" ry="22" fill="url(#lion-face)"/>
+  <!-- Muzzle -->
+  <ellipse cx="44" cy="65" rx="7" ry="5.5" fill="#fef08a"/>
+  <ellipse cx="56" cy="65" rx="7" ry="5.5" fill="#fef08a"/>
+  <!-- Nose -->
+  <polygon points="46,58 54,58 50,64" fill="#451a03"/>
+  <!-- Eyes -->
+  <ellipse cx="40" cy="48" rx="3.5" ry="2.5" fill="#ca8a04"/>
+  <circle cx="40" cy="48" r="1.8" fill="#1c1917"/>
+  <ellipse cx="60" cy="48" rx="3.5" ry="2.5" fill="#ca8a04"/>
+  <circle cx="60" cy="48" r="1.8" fill="#1c1917"/>
+</svg>

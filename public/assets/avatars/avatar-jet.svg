@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg-sky" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </radialGradient>
+    <linearGradient id="jet-metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bg-sky)"/>
+  <!-- Clouds / vapor trail -->
+  <path d="M12,85 C25,75 35,68 45,62 C38,72 26,82 12,85 Z" fill="#ffffff" opacity="0.6"/>
+  <path d="M8,92 C22,82 38,72 52,65 C42,78 28,90 8,92 Z" fill="#e0f2fe" opacity="0.4"/>
+  <!-- Fighter Jet Fuselage -->
+  <path d="M82,22 L45,48 L25,58 L28,64 L52,56 L78,35 Z" fill="url(#jet-metal)"/>
+  <!-- Nose cone -->
+  <path d="M82,22 L75,25 L78,35 Z" fill="#0f172a"/>
+  <!-- Main Delta Wings -->
+  <path d="M62,38 L25,75 L42,62 L55,45 Z" fill="#64748b"/>
+  <path d="M68,32 L88,52 L74,46 L62,38 Z" fill="#475569"/>
+  <!-- Twin Vertical Stabilizers -->
+  <path d="M38,52 L32,36 L44,48 Z" fill="#1e293b"/>
+  <path d="M42,54 L42,40 L48,50 Z" fill="#334155"/>
+  <!-- Cockpit glass -->
+  <path d="M72,27 C74,29 76,32 68,36 C64,34 66,30 72,27 Z" fill="#38bdf8"/>
+  <path d="M71,28 L68,33" stroke="#ffffff" stroke-width="1" stroke-linecap="round"/>
+  <!-- Afterburner flame -->
+  <polygon points="22,60 12,65 24,63 10,70 26,64" fill="#f97316"/>
+  <polygon points="23,61 16,64 24,63 15,68 25,64" fill="#facc15"/>
+</svg>

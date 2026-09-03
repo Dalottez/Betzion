@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Betzion app icon">
+  <defs>
+    <linearGradient id="bz-gold" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#ffe873"/>
+      <stop offset="0.45" stop-color="#ffd700"/>
+      <stop offset="1" stop-color="#e0a800"/>
+    </linearGradient>
+    <linearGradient id="bz-rise" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#52b826" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#52b826"/>
+    </linearGradient>
+    <radialGradient id="bz-glow" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#ffd700" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#ffd700" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ground: the app's own surface colour, so the icon sits flush with the UI -->
+  <rect width="512" height="512" rx="112" fill="#101722"/>
+  <rect width="512" height="512" rx="112" fill="url(#bz-glow)"/>
+
+  <!-- Ascending trajectory: the crash-game curve, read left to right -->
+  <path d="M84 424C176 424 300 356 428 108" fill="none" stroke="url(#bz-rise)"
+        stroke-width="20" stroke-linecap="round"/>
+  <circle cx="428" cy="108" r="19" fill="#52b826"/>
+  <circle cx="428" cy="108" r="34" fill="#52b826" opacity="0.22"/>
+
+  <!-- Z monogram, cut out from the curve by a dark keyline so it stays legible small -->
+  <path d="M140 150 H372 V200 L233 313 H372 V363 H140 V313 L279 200 H140 Z"
+        fill="url(#bz-gold)" stroke="#101722" stroke-width="16" stroke-linejoin="round"/>
+</svg>

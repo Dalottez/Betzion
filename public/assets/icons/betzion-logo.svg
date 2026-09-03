@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 176" role="img" aria-label="Betzion">
+  <defs>
+    <linearGradient id="bzl-gold" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#ffe873"/>
+      <stop offset="0.45" stop-color="#ffd700"/>
+      <stop offset="1" stop-color="#e0a800"/>
+    </linearGradient>
+    <linearGradient id="bzl-rise" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#52b826" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#52b826"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark -->
+  <g>
+    <rect x="8" y="8" width="160" height="160" rx="38" fill="#101722"/>
+    <path d="M34 140C63 140 102 118 142 41" fill="none" stroke="url(#bzl-rise)"
+          stroke-width="9" stroke-linecap="round"/>
+    <circle cx="142" cy="41" r="8" fill="#52b826"/>
+    <path d="M50 55 H122 V71 L79 106 H122 V122 H50 V106 L93 71 H50 Z"
+          fill="url(#bzl-gold)" stroke="#101722" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark: the Z carries the brand colour and echoes the monogram -->
+  <text x="196" y="120" font-family="'Segoe UI', Arial, Helvetica, sans-serif"
+        font-size="98" font-weight="800" letter-spacing="2">
+    <tspan fill="#ffffff">BET</tspan><tspan fill="url(#bzl-gold)">Z</tspan><tspan fill="#ffffff">ION</tspan>
+  </text>
+</svg>
