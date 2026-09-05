@@ -337,7 +337,9 @@ export class AviatorGameComponent implements OnInit, AfterViewInit, OnDestroy {
   public showProfileModal = signal<boolean>(false);
   public showProfileDropdown = signal<boolean>(false);
   public walletTab = signal<'deposit' | 'withdraw' | 'transactions'>('deposit');
-  public depositVal = signal<number>(999);
+  public depositVal = signal<number | null>(null);
+  public minDepositAmount = signal<number>(999);
+  public maxDepositAmount = signal<number>(MAX_DEPOSIT_AMOUNT);
   public depositSelectedPreset = signal<number | null>(null);
   public depositPresetTapCount = signal<number>(0);
   public withdrawVal = signal<number>(500);
@@ -633,7 +635,17 @@ export class AviatorGameComponent implements OnInit, AfterViewInit, OnDestroy {
   // WEBSOCKET & BACKEND COMMUNICATION
   // --------------------------------------------------------------------------
   private initAuthAndSockets() {
+    this.authService.getPaymentConfig().subscribe(config => {
+      this.minDepositAmount.set(config.minDepositAmount);
+      this.maxDepositAmount.set(config.maxDepositAmount);
+    });
     this.subs.push(
+      this.gameSocket.paymentConfig$.subscribe(config => {
+        if (config) {
+          this.minDepositAmount.set(config.minDepositAmount);
+          this.maxDepositAmount.set(config.maxDepositAmount);
+        }
+      }),
       this.authService.currentUser$.subscribe(u => {
         this.currentUser.set(u);
         if (u) {
@@ -2678,8 +2690,8 @@ export class AviatorGameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public adjustDepositAmount(delta: number) {
-    const current = this.depositVal() || 0;
-    this.depositVal.set(Math.max(999, current + delta));
+    const current = this.depositVal() || this.minDepositAmount();
+    this.depositVal.set(Math.max(this.minDepositAmount(), current + delta));
     // Deselect any preset when manually adjusting
     this.depositSelectedPreset.set(null);
     this.depositPresetTapCount.set(0);
@@ -2699,7 +2711,7 @@ export class AviatorGameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public addDepositAmount(val: number) {
-    const current = this.depositVal() || 0;
+    const current = this.depositVal() || this.minDepositAmount();
     this.depositVal.set(current + val);
   }
 
@@ -2730,13 +2742,17 @@ export class AviatorGameComponent implements OnInit, AfterViewInit, OnDestroy {
   private mpesaPollingInterval: any = null;
 
   public submitDeposit() {
-    const amount = this.depositVal();
-    if (isNaN(amount) || amount < 999) {
-      this.showToast('Minimum deposit is KES 999', true);
+    const rawVal = this.depositVal();
+    const amount = (rawVal !== null && rawVal !== undefined && !isNaN(Number(rawVal)) && Number(rawVal) > 0)
+      ? Number(rawVal)
+      : this.minDepositAmount();
+
+    if (isNaN(amount) || amount < this.minDepositAmount()) {
+      this.showToast(`Minimum deposit is KES ${this.minDepositAmount().toLocaleString()}`, true);
       return;
     }
-    if (amount > MAX_DEPOSIT_AMOUNT) {
-      this.showToast(`Maximum deposit is KES ${MAX_DEPOSIT_AMOUNT.toLocaleString()}`, true);
+    if (amount > this.maxDepositAmount()) {
+      this.showToast(`Maximum deposit is KES ${this.maxDepositAmount().toLocaleString()}`, true);
       return;
     }
 

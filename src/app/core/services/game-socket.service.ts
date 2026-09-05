@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject } from 'rxjs';
 import { API_ORIGIN } from '../config/api-url';
+import { MAX_DEPOSIT_AMOUNT } from '../config/deposit-limits';
+
+export interface PaymentConfigUpdate {
+  minDepositAmount: number;
+  maxDepositAmount: number;
+}
 
 export interface PhaseUpdate {
   phase: 'betting' | 'flying' | 'crashed';
@@ -132,6 +138,7 @@ export class GameSocketService {
   public transactionsUpdated$ = new BehaviorSubject<PlayerRealtimeEvent | null>(null);
   public depositsUpdated$ = new BehaviorSubject<PlayerRealtimeEvent | null>(null);
   public withdrawalsUpdated$ = new BehaviorSubject<PlayerRealtimeEvent | null>(null);
+  public paymentConfig$ = new BehaviorSubject<PaymentConfigUpdate | null>(null);
   public userUpdated$ = new BehaviorSubject<PlayerRealtimeEvent | null>(null);
 
   public getSocket(): Socket | null {
@@ -315,6 +322,18 @@ export class GameSocketService {
         slot,
         roomId,
       });
+    });
+    this.socket.on('payment:config', (data: { minDepositAmount?: number; maxDepositAmount?: number }) => {
+      if (data) {
+        const min = Number(data.minDepositAmount);
+        const max = Number(data.maxDepositAmount);
+        if (Number.isFinite(min) && min >= 1) {
+          this.paymentConfig$.next({
+            minDepositAmount: min,
+            maxDepositAmount: Number.isFinite(max) && max >= 1 ? max : MAX_DEPOSIT_AMOUNT,
+          });
+        }
+      }
     });
     this.socket.on('disconnect', () => this.isConnected$.next(false));
   }

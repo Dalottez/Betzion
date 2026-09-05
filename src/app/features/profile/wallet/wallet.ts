@@ -39,7 +39,7 @@ import { MAX_DEPOSIT_AMOUNT } from '../../../core/config/deposit-limits';
 
           <!-- QUICK PRESETS -->
           <div class="presets-row">
-            <button type="button" class="preset-pill" (click)="setDepositAmount(999)">+999</button>
+            <button type="button" class="preset-pill" (click)="setDepositAmount(minDepositAmount)">+{{ minDepositAmount | number }}</button>
             <button type="button" class="preset-pill" (click)="setDepositAmount(2000)">+2,000</button>
             <button type="button" class="preset-pill" (click)="setDepositAmount(5000)">+5,000</button>
             <button type="button" class="preset-pill" (click)="setDepositAmount(10000)">+10,000</button>
@@ -60,7 +60,7 @@ import { MAX_DEPOSIT_AMOUNT } from '../../../core/config/deposit-limits';
           <div class="field-wrap">
             <label class="field-lbl">Amount</label>
             <input type="number" [(ngModel)]="depositVal" [placeholder]="minDepositAmount.toString()" class="amount-input" [min]="minDepositAmount" />
-            <span class="help-lbl">Minimum KES {{ minDepositAmount | number }}. Maximum KES {{ maxDepositAmount | number }}.</span>
+            <span class="help-lbl">Minimum KES {{ minDepositAmount | number }}.</span>
           </div>
 
           <!-- STATUS ALERT IF ANY -->
@@ -484,7 +484,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public depositPhone: string = '';
   public withdrawPhone: string = '';
-  public depositVal: number = 999;
+  public depositVal: number | null = null;
   public minDepositAmount: number = 999;
   public maxDepositAmount: number = MAX_DEPOSIT_AMOUNT;
   public withdrawVal: number = 200;
@@ -510,12 +510,21 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const token = this.authService.getToken();
     if (token) this.gameSocket.connect(token);
-    this.authService.getPaymentConfig().subscribe(config => {
+
+    const applyPaymentConfig = (config: { minDepositAmount: number; maxDepositAmount: number }) => {
+      const prevMin = this.minDepositAmount;
       this.minDepositAmount = config.minDepositAmount;
       this.maxDepositAmount = config.maxDepositAmount;
-      if (this.depositVal === 999) this.depositVal = config.minDepositAmount;
-    });
+      if (this.depositVal === 999 || this.depositVal === prevMin) {
+        this.depositVal = config.minDepositAmount;
+      }
+    };
+
+    this.authService.getPaymentConfig().subscribe(applyPaymentConfig);
     this.subscriptions.push(
+      this.gameSocket.paymentConfig$.subscribe(config => {
+        if (config) applyPaymentConfig(config);
+      }),
       this.authService.currentUser$.subscribe(user => {
         if (user?.phone_number) {
           const cleanPhone = (user.phone_number || '').replace(/^(\+?254|0)+/, '');
@@ -534,7 +543,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         this.depositStatusType = 'success';
         setTimeout(() => {
           this.depositStatusMsg = '';
-          this.depositVal = this.minDepositAmount;
+          this.depositVal = null;
         }, 2500);
       }),
       this.gameSocket.mpesaFailed$.subscribe(event => {
@@ -578,7 +587,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   addDepositAmount(val: number) {
-    this.depositVal = (this.depositVal || 0) + val;
+    this.depositVal = (this.depositVal || this.minDepositAmount) + val;
   }
 
   setDepositAmount(val: number) {
@@ -590,12 +599,16 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   submitDeposit() {
-    if (!this.depositVal || this.depositVal < this.minDepositAmount) {
+    const amount = (this.depositVal !== null && this.depositVal !== undefined && !isNaN(Number(this.depositVal)) && Number(this.depositVal) > 0)
+      ? Number(this.depositVal)
+      : this.minDepositAmount;
+
+    if (amount < this.minDepositAmount) {
       this.depositStatusMsg = `Minimum deposit is KES ${this.minDepositAmount.toLocaleString()}.`;
       this.depositStatusType = 'error';
       return;
     }
-    if (this.depositVal > this.maxDepositAmount) {
+    if (amount > this.maxDepositAmount) {
       this.depositStatusMsg = `Maximum deposit is KES ${this.maxDepositAmount.toLocaleString()}.`;
       this.depositStatusType = 'error';
       return;
@@ -612,7 +625,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.depositStatusMsg = 'Initiating STK Push...';
     this.depositStatusType = 'info';
 
-    this.authService.initiateMpesaSTKPush(this.depositVal, fullPhone)
+    this.authService.initiateMpesaSTKPush(amount, fullPhone)
       .subscribe({
         next: (res) => {
           this.depositStatusMsg = '📱 Check your phone! Enter your M-Pesa PIN to complete payment.';
@@ -659,7 +672,7 @@ export class WalletComponent implements OnInit, OnDestroy {
             this.depositStatusType = 'success';
             setTimeout(() => {
               this.depositStatusMsg = '';
-              this.depositVal = this.minDepositAmount;
+              this.depositVal = null;
             }, 4000);
           } else if (res.status === 'failed') {
             this.clearStkStatusPolling();

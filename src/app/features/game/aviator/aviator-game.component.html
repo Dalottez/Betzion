@@ -676,9 +676,9 @@
           <input type="number" 
                  [ngModel]="depositVal()" 
                  (ngModelChange)="depositVal.set($event)" 
-                 placeholder="999" 
+                 [placeholder]="minDepositAmount().toString()" 
                  class="amount-text-input" />
-          <div class="form-helper-text">Minimum KES 999.</div>
+          <div class="form-helper-text">Minimum KES {{ minDepositAmount() | number }}.</div>
         </div>
 
         <!-- STATUS / STK MESSAGES IF ANY -->
